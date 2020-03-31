@@ -9,9 +9,13 @@ oponents humans.
 
 ## Components del grup
 Xavi Coret - 1423586
+
 Marian Cabrera - 1392634
+
 Martí Tuneu - 1425069
+
 Marc Callado - 1392623
+
 
 ## Descripció del projecte
 
@@ -28,9 +32,7 @@ cinemàtiques per dur-la a terme.
 **Control:** Mòdul encarregat d’organitzar l’execució dels demés mòduls a partir de la informació que aquests li proporcionin. Les seves tasques seran:    
 
     - Formar un estat de partida a partir de la informació de la càmera rebuda del mòdul Visió. (Processament d’imatges a dades).
-
     - Informar al mòdul jugabilitat de l’estat de la partida perquè aquest respongui amb una jugada.
-    
     - Proporcionar al mòdul Moviment les coordenades inicials i finals de la posició de la fitxa a moure.
 
 **Jugabilitat:** S’encarrega de definir la jugada a realitzar a partir de l’estat de la partida que rep del mòdul Control i també del nivell de dificultat seleccionat.
