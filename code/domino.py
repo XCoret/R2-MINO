@@ -10,6 +10,7 @@ Classe fitxa:
     vb : valor extrem B
     orientacio : (0:horitzontal, 1:vertical)
 '''
+print('Modul Joc Carregat!')
 class Fitxa:
     def __init__(self, vA,vB,orientacio):
         self.vA = vA
@@ -17,6 +18,12 @@ class Fitxa:
         self.orientacio = orientacio
 
 def func():
-    for i in range(6):
-        print(i)
-    print('Domino!')
+    fitxes=[]
+    for a in range(7):
+        for b in range(7-a):
+            fitxes.append(Fitxa(a,b,1))
+        #print(a)
+        
+    for f in fitxes:
+        print(str(f.vA)+' '+str(f.vB))
+    print(len(fitxes))

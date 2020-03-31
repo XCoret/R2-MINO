@@ -16,7 +16,7 @@ import visio as v
 import moviment as m
 
 if __name__ == '__main__':
-    print('Modul Control')
+    print('Modul Control Excecutant')
     d.func()
     v.llegirImatge('src/domino.jpg')
     print(m.getMovementTo(4,4,4))
