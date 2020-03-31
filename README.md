@@ -40,3 +40,5 @@ cinemàtiques per dur-la a terme.
 **Visió:** Computa els canvis registrats en el taulell de joc i ho passa al Mòdul Control.
 
 **Moviment:** A partir de les coordenades inicials i finals de posició de la fitxa a moure, rebuda del mòdul Control, calcular el moviment del braç i executar-lo.
+
+![alt text](https://raw.githubusercontent.com/XCoret/R2-MINO/master/docs/diagrama.png)

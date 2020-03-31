@@ -18,6 +18,6 @@ import moviment as m
 if __name__ == '__main__':
     print('Modul Control')
     d.func()
-    v.llegitImatge('src/domino.jpg')
+    v.llegirImatge('src/domino.jpg')
     print(m.getMovementTo(4,4,4))
     
