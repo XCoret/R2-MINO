@@ -12,24 +12,24 @@ blue = (0,0,255)
 ##END COLORS ##
 
 pygame.init()
-pWindow= pygame.display.set_mode((800,800))
+pWindow= pygame.display.set_mode((1600,800))
 pygame.display.set_caption("R2-MINO")
 
-baseX= 400
+baseX= 800
 baseY= 400
-
-lenghtA = 280 ## mm
-widthA = 50 ## mm
 baseRadius = 37 ## mm
 
-AposX = baseX-lenghtA
+lenghtA = 280 ## mm
+widthA = 25 ## mm
+AposX = baseX+lenghtA
 AposY = 400
-
 degreeA = 0
-vel = 1
 
-##BposX=0
-##BposY=0
+lenghtB = 280 ## mm
+widthB = 25 ## mm
+BposX = AposX+lenghtB
+BposY = 400
+degreeB = 0
 
 
 def getNewPosition(lenght, degree, centerX, centerY):
@@ -47,6 +47,9 @@ while True:
     
     (AposX,AposY) = getNewPosition(lenghtA, degreeA, baseX, baseY)
     pygame.draw.line(pWindow, blue, (baseX,baseY), (round(AposX),round(AposY)), widthA)
+
+    (BposX,BposY) = getNewPosition(lenghtB, degreeB, AposX, AposY)
+    pygame.draw.line(pWindow, green, (round(AposX),round(AposY)), (round(BposX),round(BposY)), widthA)
     
     for pEvent in pygame.event.get():
         if pEvent.type == QUIT:
