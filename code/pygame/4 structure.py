@@ -55,11 +55,18 @@ while True:
         if pEvent.type == QUIT:
             pygame.quit()
             sys.exit()
-
-    if degreeA == 360:
-        degreeA = 0
-        
-    degreeA +=1
+        ## KEY controls
+        elif pEvent.type == pygame.KEYDOWN:
+            if pEvent.key == K_LEFT:
+                degreeA+=1
+            elif pEvent.key == K_RIGHT:
+                degreeA-=1
+            if pEvent.key == K_UP:
+                degreeB+=1
+            elif pEvent.key == K_DOWN:
+                degreeB-=1
+        ## END KEY controls
+    
     pygame.display.update()
 
 
