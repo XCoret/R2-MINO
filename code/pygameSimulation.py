@@ -9,27 +9,39 @@ black=(0,0,0)
 red = (255,0,0)
 green = (0,255,0)
 blue = (0,0,255)
-##END COLORS ##
+orange = (255,153,0)
 
-pygame.init()
-pWindow= pygame.display.set_mode((1600,800))
-pygame.display.set_caption("R2-MINO")
+## WINDOW ##
+heightW = 800
+widthW = 1600
+widthColumn = 600
+heightRow = heightW/2
 
-baseX= 800
+## BASE
+baseX= 900
 baseY= 400
 baseRadius = 37 ## mm
 
-lenghtA = 280 ## mm
+## Arm A
+lenghtA = 280/2 ## mm
 widthA = 25 ## mm
 AposX = baseX+lenghtA
 AposY = 400
 degreeA = 0
 
-lenghtB = 280 ## mm
+## Arm B
+lenghtB = 360/2 ## mm
 widthB = 25 ## mm
 BposX = AposX+lenghtB
 BposY = 400
 degreeB = 0
+
+## Arm C
+lengthC = 152 ##mm
+
+pygame.init()
+pWindow= pygame.display.set_mode((widthW,heightW), pygame.RESIZABLE)
+pygame.display.set_caption("R2-MINO")
 
 
 def getNewPosition(lenght, degree, centerX, centerY):
@@ -39,17 +51,36 @@ def getNewPosition(lenght, degree, centerX, centerY):
     return newX, newY
 
 
+def printGrid():
+    pWindow.fill(white)
+    pygame.draw.line(pWindow, black, (widthColumn,0), (widthColumn, heightW))
+    pygame.draw.line(pWindow, black, (0,heightRow), (widthColumn, heightRow))
+
+
+def printFirstCell():
+    pygame.draw.line(pWindow, blue, (0, 100),(400-(lenghtB*2),100), widthB)
+    pygame.draw.line(pWindow, green, (400-(lenghtB*2),100), (400,100), widthB)
+
+def printSecondCell():
+    pygame.draw.line(pWindow, blue, (0, heightRow+(heightRow/2)),(400-(lenghtB*2),heightRow+(heightRow/2)), widthB)
+    pygame.draw.line(pWindow, green, (400-(lenghtB*2),heightRow+(heightRow/2)), (400,heightRow+(heightRow/2)), widthB)
 
 
 while True:
-    pWindow.fill(white)
+    printGrid()
     pygame.draw.circle(pWindow, red, (baseX,baseY), baseRadius)
     
     (AposX,AposY) = getNewPosition(lenghtA, degreeA, baseX, baseY)
     pygame.draw.line(pWindow, blue, (baseX,baseY), (round(AposX),round(AposY)), widthA)
 
     (BposX,BposY) = getNewPosition(lenghtB, degreeB, AposX, AposY)
-    pygame.draw.line(pWindow, green, (round(AposX),round(AposY)), (round(BposX),round(BposY)), widthA)
+    pygame.draw.line(pWindow, green, (round(AposX),round(AposY)), (round(BposX),round(BposY)), widthB)
+
+    printFirstCell()
+    pygame.draw.line(pWindow, orange, (350,50), (350,50+lengthC), widthB)
+
+    printSecondCell()
+
     
     for pEvent in pygame.event.get():
         if pEvent.type == QUIT:
