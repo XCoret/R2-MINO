@@ -26,6 +26,7 @@ areaList = []
 ## BASE
 baseX= 1100
 baseY= 600
+baseHeight = 100 ##mm TODO ajustar
 baseRadius = 50 ## mm
 
 ## Arm A
@@ -46,8 +47,12 @@ maxDegreeB = 360 ## TODO ajustar
 
 ## Arm C
 lengthC = 152 ##mm
+maxDegreeC = 180
+radiusC = 20 ##mm
 
 autoRun = True
+
+
 
 ## FUNCTIONS ##
 
@@ -79,6 +84,8 @@ def printSecondCell():
     pygame.draw.line(pWindow, blue, (0, heightRow+(heightRow/2)),(400-(lenghtB*2),heightRow+(heightRow/2)), widthB)
     pygame.draw.line(pWindow, green, (400-(lenghtB*2),heightRow+(heightRow/2)), (400,heightRow+(heightRow/2)), widthB)
 
+def calculateToolPath():
+    ## 2*PI*radius ?
 
 
 ## MAIN ##
@@ -86,6 +93,8 @@ def printSecondCell():
 pygame.init()
 pWindow= pygame.display.set_mode((widthW,heightW), pygame.RESIZABLE)
 pygame.display.set_caption("R2-MINO")
+
+
 
 while True:
     printGrid()
