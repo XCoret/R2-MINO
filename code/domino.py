@@ -37,18 +37,18 @@ class playerAlgorithm:
 
     def humanLoop(self):
         #wait: Nova peça apareix, no queden peces al pou per primera vegada i el jugador no pot tirar (revisar des de visió)
-
+        return false
     def robotLoop(self):
         playing = true
 
         while(playing):
             #Hi ha fitxa disponible que encaixi en valor amb algun dels extrems?
-            if(validTocken):
+            if(validToken):
                 #Col·locarla
                 playing = false
-                return true
+                return token #peça a col·locar
             else:
-                if(moreTockens):
+                if(moreTokens): #Que encara hi ha peces al pou
                     #Agafar fitxa del pou
                 else:
                     #Passar torn
@@ -58,6 +58,6 @@ class playerAlgorithm:
 
     def playTurn(self):
         if(self.__playerType == "h"):
-            humanLoop
+            return humanLoop()
         elif(self.__playerType == "r"):
-            robotLoop
+            return robotLoop()

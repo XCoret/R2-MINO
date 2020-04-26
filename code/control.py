@@ -44,7 +44,10 @@ if __name__ == '__main__':
         while(isGame):
             #Apartr el braç per llegir taulell
             
-            firstTurn.playTurn()
+            token = firstTurn.playTurn()
+
+            if(token != false):
+                #col·locarla amb sentit
 
             #Apartr el braç per llegir taulell si torn humà
 
