@@ -7,6 +7,33 @@ import numpy as np
 from matplotlib import pyplot as plt
 import time
 
+def mostrarResultat(im,estatPartida,debug=False):
+    for d in estatPartida:
+        if debug:
+            print(d,':',estatPartida[d])
+        punts = estatPartida[d][1]
+        x,y,w,h = estatPartida[d][0]
+        orientacio = estatPartida[d][2]
+        margin=20
+        if orientacio == 0:
+            x1=x-margin
+            y1=y+int(h/2)
+            x2=x+w
+            y2=y+int(h/2)
+            im =cv.putText(im,str(punts[0]),(x1,y1), cv.FONT_HERSHEY_SIMPLEX, 1,(0,255,0),2,cv.LINE_AA)
+            im =cv.putText(im,str(punts[1]),(x2,y2), cv.FONT_HERSHEY_SIMPLEX, 1,(0,255,0),2,cv.LINE_AA)
+        else:
+            x1=x+int(w/2)
+            y1=y
+            x2=x+int(w/2)
+            y2=y+h+margin
+            im =cv.putText(im,str(punts[0]),(x1,y1), cv.FONT_HERSHEY_SIMPLEX, 1,(255,0,0),2,cv.LINE_AA)
+            im =cv.putText(im,str(punts[1]),(x2,y2), cv.FONT_HERSHEY_SIMPLEX, 1,(255,0,0),2,cv.LINE_AA)            
+        if debug:
+            im =cv.putText(im,str(d),(x+int(w/2),(y+int(h/2))), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
+    im.astype('uint8')
+    return im
+    
 def processarFrame(frame, debug=False):
     start = time.time()
     im = frame.copy()
@@ -46,7 +73,7 @@ def processarFrame(frame, debug=False):
             # registrem les dades del punt actual
             x,y,w,h = cv.boundingRect(contours[i])
             punts=[0,0]
-            
+            orientacio=0
             #Comprovem l'orientacio de la fitxa i assignem el punt a un dels costats
             if cos[2] > cos[3]:
                 # Horitzontal
@@ -73,39 +100,15 @@ def processarFrame(frame, debug=False):
             else:               
                 dictContorns[str(pare)][1][0]+=punts[0]
                 dictContorns[str(pare)][1][1]+=punts[1]
-    # Si la funcio s'executa en mode debug, escribim els punts de cada fitxa a la imatge i la mostrem
     if debug:
-        for d in dictContorns:
-            print(d,':',dictContorns[d])
-            punts = dictContorns[d][1]
-            x,y,w,h = dictContorns[d][0]
-            orientacio = dictContorns[d][2]
-            margin=20
-            if orientacio == 0:
-                x1=x-margin
-                y1=y+int(h/2)
-                x2=x+w
-                y2=y+int(h/2)
-                im =cv.putText(im,str(punts[0]),(x1,y1), cv.FONT_HERSHEY_SIMPLEX, 1,(0,255,0),2,cv.LINE_AA)
-                im =cv.putText(im,str(punts[1]),(x2,y2), cv.FONT_HERSHEY_SIMPLEX, 1,(0,255,0),2,cv.LINE_AA)
-            else:
-                x1=x+int(w/2)
-                y1=y
-                x2=x+int(w/2)
-                y2=y+h+margin
-                im =cv.putText(im,str(punts[0]),(x1,y1), cv.FONT_HERSHEY_SIMPLEX, 1,(255,0,0),2,cv.LINE_AA)
-                im =cv.putText(im,str(punts[1]),(x2,y2), cv.FONT_HERSHEY_SIMPLEX, 1,(255,0,0),2,cv.LINE_AA)            
-            im =cv.putText(im,str(d),(x+int(w/2),(y+int(h/2))), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
-        im.astype('uint8')
-        plt.figure()
-        plt.imshow(im)  
-    print('Temps execució: %.3f segons' %(time.time()-start))
+        print('Temps execució: %.3f segons' %(time.time()-start))
+    return dictContorns
 
-    
-    
-    
 if __name__ == '__main__':
     frame = cv.imread('src/test1fitxa.png')    
-    processarFrame(frame,True)
-    
-        
+    estatPartida = processarFrame(frame,True)
+    im=frame.copy()
+    debug = True;
+    if debug:
+        plt.figure()
+        plt.imshow(mostrarResultat(im,estatPartida))
