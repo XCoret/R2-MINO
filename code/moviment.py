@@ -9,7 +9,10 @@ import math
 class C:
     PI = 3.14159
     ARM_1 = 4;
-    ARM_2 = 2
+    ARM_2 = 2;
+    OPEN_DEGREES = 180;
+    CLOSE_DEGREES = 90;
+    LIFT_VALUE = 180; 
 
     pos = 0
 
@@ -41,6 +44,35 @@ class C:
         angulo2 = self.rad_2_grad(a2Radianes)
         print ("ANGULO 1: " + str(angulo1))
         print ("ANGULO 2: " + str(angulo2))
+        return [angulo1, angulo2]
 
+    ''' Actual funcitons that would had moved the servos instead of returning values for the demo '''
+    def operateToolOpen(self, isOpen):
+        if(isOpen):
+            return self.OPEN_DEGREES
+        else:
+            return self.CLOSE_DEGREES
+
+    def operateToolRotate(self, direction):
+        if (direction == "N"):
+            return 0
+        elif (direction == "S"):
+            return 180
+        elif (direction == "E"):
+            return 90
+        elif (direction == "W"):
+            return 270
+            
+    def operateToolLift(self, isLift):
+        if(isLift):
+            return self.LIFT_VALUE
+        else:
+            return 0
+
+    def moveTo(self, x_pos, y_pos):
+        return calculate_movement(x_pos, y_pos)
+    
+
+''' test that will be on calcul module '''
 c = C()
 c.calculate_movement(3, 4)
