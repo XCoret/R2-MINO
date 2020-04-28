@@ -84,10 +84,6 @@ def printSecondCell():
     pygame.draw.line(pWindow, blue, (0, heightRow+(heightRow/2)),(400-(lenghtB*2),heightRow+(heightRow/2)), widthB)
     pygame.draw.line(pWindow, green, (400-(lenghtB*2),heightRow+(heightRow/2)), (400,heightRow+(heightRow/2)), widthB)
 
-def calculateToolPath():
-    ## 2*PI*radius ?
-
-
 ## MAIN ##
 
 pygame.init()
