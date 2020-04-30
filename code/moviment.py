@@ -8,11 +8,14 @@ import math
 
 class C:
     PI = 3.14159
-    ARM_1 = 4;
-    ARM_2 = 2;
-    OPEN_DEGREES = 180;
-    CLOSE_DEGREES = 90;
-    LIFT_VALUE = 180; 
+    ARM_1 = 25
+    ARM_2 = 25
+    OPEN_DEGREES = 0
+    CLOSE_DEGREES = 45
+    IDLE_X = 180
+    IDLE_Y = 90
+    LIFT_VALUE= 360
+    
 
     pos = 0
 
@@ -42,9 +45,9 @@ class C:
         a2Radianes = self.cos_law(self.ARM_1, self.ARM_2, dist)
         angulo1 = self.rad_2_grad(a1Radianes)
         angulo2 = self.rad_2_grad(a2Radianes)
-        print ("ANGULO 1: " + str(angulo1))
-        print ("ANGULO 2: " + str(angulo2))
-        return [angulo1, angulo2]
+        print ("ANGULO 1: " + str(round(angulo1,2)))
+        print ("ANGULO 2: " + str(round(angulo2,2)))
+        return [round(angulo1,2), round(angulo2,2)]
 
     ''' Actual funcitons that would had moved the servos instead of returning values for the demo '''
     def operateToolOpen(self, isOpen):
@@ -69,10 +72,13 @@ class C:
         else:
             return 0
 
+    def idlePosition(self):
+        return (self.IDLE_X, self.IDLE_Y)
+
     def moveTo(self, x_pos, y_pos):
         return calculate_movement(x_pos, y_pos)
     
 
 ''' test that will be on calcul module '''
-c = C()
-c.calculate_movement(3, 4)
+#c = C()
+#c.calculate_movement(20, 45)
