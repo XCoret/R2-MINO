@@ -1,7 +1,9 @@
 import pygame,sys
 import math
+import time
 from pygame.locals import *
 from random import randint
+from moviment import C
 
 ## COLORS ##
 white =(255,255,255)
@@ -35,26 +37,58 @@ widthA = 25 ## mm
 AposX = baseX+lenghtA
 AposY = 400
 degreeA = 0
-maxDegreeA = 180
+maxDegreeA = 360
 
 ## Arm B
 lenghtB = 250 ## mm
 widthB = 25 ## mm
 BposX = AposX+lenghtB
 BposY = 400
-degreeB = 90
-maxDegreeB = 360 ## TODO ajustar
+degreeB = 0
+maxDegreeB = 360 ## 
 
 ## Arm C
-lengthC = 152 ##mm
+lengthC = 200 ##mm
 maxDegreeC = 180
 radiusC = 20 ##mm
 
 autoRun = True
 
+count_test = 0
+setIdle = False
+
+## INIT ##
+
+pygame.init()
+mov = C()
+pWindow= pygame.display.set_mode((widthW,heightW), pygame.RESIZABLE)
+pygame.display.set_caption("R2-MINO")
+degreeA, degreeB = mov.idlePosition()
+next_degreeA = degreeA
+next_degreeB = degreeB
+
 
 
 ## FUNCTIONS ##
+
+def resetDegrees():
+    return mov.idlePosition()
+
+def test1(count_test):
+    positions = [[0, 5], [25, 5], [25, 25], [25, 45], [0, 45], [-20, 45], [-20, 25], [-20, 5]]
+    (x, y) = mov.calculate_movement(positions[count_test][0], positions[count_test][1])
+    return x, y
+
+def test2(count_test, setIdle):
+    positions = [[10, 15], [10, 35], [-10, 35], [-10, 15], [0, 25]]
+
+    if setIdle == True:
+        (x, y) = resetDegrees()
+    else:
+        (x, y) = mov.calculate_movement(positions[count_test][0], positions[count_test][1])
+    
+    return x, y
+    
 
 def drawTable():
     pygame.draw.rect(pWindow,greenTable,(baseX-round(tableSide/2),baseY-(tableSide + baseRadius), tableSide, tableSide))
@@ -67,8 +101,8 @@ def calculateFirstArm():
     return x,y
 
 def calculateSecondArm():
-    x = lenghtB * math.cos(math.radians(degreeA - degreeB + 180))  + AposX
-    y = lenghtB * math.sin(math.radians(degreeA - degreeB + 360)) + AposY
+    x = lenghtB * math.cos(math.radians(degreeA + degreeB + 180))  + AposX
+    y = lenghtB * math.sin(math.radians(degreeA + degreeB + 360)) + AposY
     return x,y
 
 def printGrid():
@@ -77,20 +111,28 @@ def printGrid():
     pygame.draw.line(pWindow, black, (0,heightRow), (widthColumn, heightRow))
 
 def printFirstCell():
-    pygame.draw.line(pWindow, blue, (0, 100),(400-(lenghtB*2),100), widthB)
-    pygame.draw.line(pWindow, green, (400-(lenghtB*2),100), (400,100), widthB)
+    pygame.draw.line(pWindow, green, (400-(lenghtB*2),heightRow/2), (400,heightRow/2), widthB)
 
 def printSecondCell():
-    pygame.draw.line(pWindow, blue, (0, heightRow+(heightRow/2)),(400-(lenghtB*2),heightRow+(heightRow/2)), widthB)
     pygame.draw.line(pWindow, green, (400-(lenghtB*2),heightRow+(heightRow/2)), (400,heightRow+(heightRow/2)), widthB)
 
+def printClosedTool():
+    pygame.draw.line(pWindow, blue, (350,140+lengthC), (350+20,140+lengthC+50), 15)
+    pygame.draw.line(pWindow, blue, (350,140+lengthC), (350-20,140+lengthC+50), 15)
+
+def printOpenedTool():
+    pygame.draw.line(pWindow, blue, (350,140+lengthC), (350+40,140+lengthC+50), 15)
+    pygame.draw.line(pWindow, blue, (350,140+lengthC), (350-40,140+lengthC+50), 15)
+
+def printLiftTool(isLift):
+    if isLift:
+        pygame.draw.line(pWindow, orange, (350,80), (350,60+lengthC), widthB)
+    else:
+        pygame.draw.line(pWindow, orange, (350,160), (350,140+lengthC), widthB)
+    
+
+
 ## MAIN ##
-
-pygame.init()
-pWindow= pygame.display.set_mode((widthW,heightW), pygame.RESIZABLE)
-pygame.display.set_caption("R2-MINO")
-
-
 
 while True:
     printGrid()
@@ -104,7 +146,9 @@ while True:
     pygame.draw.line(pWindow, green, (round(AposX),round(AposY)), (round(BposX),round(BposY)), widthB)
 
     printFirstCell()
-    pygame.draw.line(pWindow, orange, (350,50), (350,50+lengthC), widthB)
+
+    printLiftTool(True)
+    printClosedTool()  
 
     printSecondCell()
     
@@ -115,11 +159,15 @@ while True:
         ## KEY controls
         elif pEvent.type == pygame.KEYDOWN:
             if pEvent.key == K_LEFT:
-                if degreeA<maxDegreeA:
-                    degreeA+=1
+                next_degreeA, next_degreeB = test2(count_test, setIdle)
+                if setIdle:
+                    setIdle = False
+                else:
+                    count_test +=1
+                    setIdle = True
             elif pEvent.key == K_RIGHT:
-                if degreeA>0:
-                   degreeA-=1
+                degreeA, degreeB = test1(count_test)
+                count_test +=1
             if pEvent.key == K_UP:
                 if degreeB<maxDegreeB:
                     degreeB+=1
@@ -128,12 +176,27 @@ while True:
                     degreeB-=1
         ## END KEY controls
 
-    if(autoRun == True):
-        degreeB+=1
-        if degreeB > maxDegreeB:
-            degreeB = 0
-            degreeA += 1
-            if degreeA > maxDegreeA:
-                degreeA = 0
-        
+
+    if degreeA != next_degreeA:
+        if(degreeA < next_degreeA):
+            degreeA +=0.01
+        else:
+            degreeA -=0.01
+    if degreeB != next_degreeB:
+        if(degreeB < next_degreeB):
+            degreeB +=0.01
+        else:
+            degreeB -=0.01
+
     pygame.display.update()
+    #time.sleep(0.1)
+
+##    if(autoRun == True):
+##        degreeB+=1
+##        if degreeB > maxDegreeB:
+##            degreeB = 0
+##            degreeA += 1
+##            if degreeA > maxDegreeA:
+##                degreeA = 0
+        
+    
