@@ -52,7 +52,18 @@ lengthC = 200 ##mm
 maxDegreeC = 180
 radiusC = 20 ##mm
 
-autoRun = True
+maxHeight = 60
+minHeight =140
+isDown = False
+
+minOpening = 20
+maxOpening = 40
+
+actualOpening = maxOpening
+
+actualHeight = maxHeight
+
+autoRun = False
 
 count_test = 0
 setIdle = False
@@ -66,7 +77,14 @@ pygame.display.set_caption("R2-MINO")
 degreeA, degreeB = mov.idlePosition()
 next_degreeA = degreeA
 next_degreeB = degreeB
+armAReady = False
+armBReady = False
 
+hasStartedCatch = False
+hasStartedDrop = False
+
+#printLiftTool(True)
+#printOpenedTool(True)
 
 
 ## FUNCTIONS ##
@@ -88,7 +106,26 @@ def test2(count_test, setIdle):
         (x, y) = mov.calculate_movement(positions[count_test][0], positions[count_test][1])
     
     return x, y
-    
+
+def test3 (count_test):
+    global hasStartedCatch
+    global hasStartedDrop
+    if(count_test == 0):
+        goTo(-22,44, False)
+        hasStartedCatch = True
+    elif(count_test == 1):
+        goTo(10,35, False)
+        hasStartedDrop = True
+    elif(count_test == 2):
+        goTo(10,35, True)
+
+def goTo(goX, goY, isIdle):
+    global next_degreeA
+    global next_degreeB
+    if isIdle:
+        next_degreeA, next_degreeB = resetDegrees()
+    else:
+        next_degreeA, next_degreeB = mov.calculate_movement(goX, goY)
 
 def drawTable():
     pygame.draw.rect(pWindow,greenTable,(baseX-round(tableSide/2),baseY-(tableSide + baseRadius), tableSide, tableSide))
@@ -111,25 +148,97 @@ def printGrid():
     pygame.draw.line(pWindow, black, (0,heightRow), (widthColumn, heightRow))
 
 def printFirstCell():
-    pygame.draw.line(pWindow, green, (400-(lenghtB*2),heightRow/2), (400,heightRow/2), widthB)
+    pygame.draw.line(pWindow, green, (0,heightRow/2), (375,heightRow/2), widthB)
 
 def printSecondCell():
-    pygame.draw.line(pWindow, green, (400-(lenghtB*2),heightRow+(heightRow/2)), (400,heightRow+(heightRow/2)), widthB)
+    pygame.draw.line(pWindow, green, (0,heightRow+(heightRow/2)), (375,heightRow+(heightRow/2)), widthB)
 
-def printClosedTool():
-    pygame.draw.line(pWindow, blue, (350,140+lengthC), (350+20,140+lengthC+50), 15)
-    pygame.draw.line(pWindow, blue, (350,140+lengthC), (350-20,140+lengthC+50), 15)
-
-def printOpenedTool():
-    pygame.draw.line(pWindow, blue, (350,140+lengthC), (350+40,140+lengthC+50), 15)
-    pygame.draw.line(pWindow, blue, (350,140+lengthC), (350-40,140+lengthC+50), 15)
-
-def printLiftTool(isLift):
-    if isLift:
-        pygame.draw.line(pWindow, orange, (350,80), (350,60+lengthC), widthB)
+def printClosedTool(isLift):
+    if(isLift):
+        pygame.draw.line(pWindow, blue, (350,60+lengthC), (350+20,60+lengthC+50), 15)
+        pygame.draw.line(pWindow, blue, (350,60+lengthC), (350-20,60+lengthC+50), 15)
     else:
-        pygame.draw.line(pWindow, orange, (350,160), (350,140+lengthC), widthB)
+        pygame.draw.line(pWindow, blue, (350,140+lengthC), (350+20,140+lengthC+50), 15)
+        pygame.draw.line(pWindow, blue, (350,140+lengthC), (350-20,140+lengthC+50), 15)
+
+def printOpenedTool(isLift):
+    if(isLift):
+        pygame.draw.line(pWindow, blue, (350,60+lengthC), (350+40,60+lengthC+50), 15)
+        pygame.draw.line(pWindow, blue, (350,60+lengthC), (350-40,60+lengthC+50), 15)
+    else:
+        pygame.draw.line(pWindow, blue, (350,140+lengthC), (350+40,140+lengthC+50), 15)
+        pygame.draw.line(pWindow, blue, (350,140+lengthC), (350-40,140+lengthC+50), 15)
+
+def printLiftTool(actualHeight):
+    pygame.draw.line(pWindow, orange, (350,actualHeight+20), (350,actualHeight+lengthC), widthB)
+
+def printTool(actualHeight, actualOpening):
+    pygame.draw.line(pWindow, red, (350,actualHeight+lengthC), (350+actualOpening,actualHeight+lengthC+50), 15)
+    pygame.draw.line(pWindow, blue, (350,actualHeight+lengthC), (350-actualOpening,actualHeight+lengthC+50), 15)
+
+def printToolCell2():
+    pygame.draw.line(pWindow, blue, (350,lengthC+heightRow+50), (350,heightRow+(heightRow/2)), 15)
+    pygame.draw.line(pWindow, red, (350,lengthC+heightRow-50), (350,heightRow+(heightRow/2)), 15)
+
+def upTool():
+    global actualHeight
+    global isDown
+    if(actualHeight > maxHeight and isDown):
+        actualHeight -=0.05
+        return True
+    else:
+        isDown = False
+        return False
+
+def downTool():
+    global actualHeight
+    global isDown
+    if(actualHeight < minHeight and not isDown):
+        actualHeight +=0.05
+        return True
+    else:
+        isDown = True
+        return False
     
+def openTool(): 
+    global actualOpening
+    if(actualOpening < maxOpening):
+        actualOpening +=0.05
+        return True
+    else:
+        return False
+
+def closeTool(): 
+    global actualOpening
+    if(actualOpening > minOpening):
+        actualOpening -=0.05
+        return True
+    else:
+        return False
+    
+def catch():
+    global hasStartedCatch
+    if downTool():
+        return True
+    elif closeTool():
+        return True
+    elif upTool():
+        return True
+    else:
+        hasStartedCatch = False
+        return False
+    
+def drop():
+    global hasStartedDrop
+    if downTool():
+        return True
+    elif openTool():
+        return True
+    elif upTool():
+        return True
+    else:
+        hasStartedDrop = False
+        return False
 
 
 ## MAIN ##
@@ -146,10 +255,9 @@ while True:
     pygame.draw.line(pWindow, green, (round(AposX),round(AposY)), (round(BposX),round(BposY)), widthB)
 
     printFirstCell()
-
-    printLiftTool(True)
-    printClosedTool()  
-
+    printLiftTool(actualHeight)
+    printTool(actualHeight, actualOpening)
+    printToolCell2()
     printSecondCell()
     
     for pEvent in pygame.event.get():
@@ -160,6 +268,9 @@ while True:
         elif pEvent.type == pygame.KEYDOWN:
             if pEvent.key == K_LEFT:
                 next_degreeA, next_degreeB = test2(count_test, setIdle)
+   
+                hasStartedCatch = True
+                hasStartedDrop = True
                 if setIdle:
                     setIdle = False
                 else:
@@ -169,24 +280,37 @@ while True:
                 degreeA, degreeB = test1(count_test)
                 count_test +=1
             if pEvent.key == K_UP:
-                if degreeB<maxDegreeB:
-                    degreeB+=1
+                test3 (count_test)
+                count_test +=1
             elif pEvent.key == K_DOWN:
                 if degreeB>0:
                     degreeB-=1
         ## END KEY controls
 
 
-    if degreeA != next_degreeA:
+    if round(degreeA,2) != next_degreeA:
+        armAReady = False
         if(degreeA < next_degreeA):
             degreeA +=0.01
         else:
             degreeA -=0.01
-    if degreeB != next_degreeB:
+    else:
+        
+        armAReady = True
+        #nex action
+    if round(degreeB,2) != next_degreeB:
+        armBReady = False
         if(degreeB < next_degreeB):
             degreeB +=0.01
         else:
             degreeB -=0.01
+    else:
+        armBReady = True
+
+    if armAReady and armBReady and hasStartedCatch:
+        catch()
+    if armAReady and armBReady and hasStartedDrop:
+        drop()
 
     pygame.display.update()
     #time.sleep(0.1)
