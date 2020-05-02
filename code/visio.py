@@ -6,6 +6,8 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 import time
+import math
+
 
 def mostrarResultat(im,estatPartida,debug=False):
     for d in estatPartida:
@@ -90,7 +92,6 @@ def processarFrame(frame, debug=False):
                 else:
                     punts=[0,1] # Inferior
             else:
-                print('Error!')
                 pass          
             
             # Si la fitxa no existeix en el diccionari, la afegim amb totes les dades que hem recollit
@@ -103,6 +104,65 @@ def processarFrame(frame, debug=False):
     if debug:
         print('Temps execució: %.3f segons' %(time.time()-start))
     return dictContorns
+
+#####################################################################################################################################################
+
+def getFirstFeatures(frame, debug=False):
+    #frame = cv.imread('src/segonaFitxa.jpg')
+    if debug:
+        start = time.time()
+    im = frame.copy()
+    # Aplicar Threshold per obtenir imatge binaria
+    ret,threshold = cv.threshold(frame,127,255,cv.THRESH_BINARY) 
+    # Aplicar filtre Gaussia per eliminar el soroll
+    threshold = cv.GaussianBlur(threshold, (5,5), 0) 
+
+    # Creem imatge 2D per trobar-hi contorns 
+    contorns = threshold[:,:,0]
+    if debug :
+        plt.figure()
+        plt.imshow(contorns,'gray')
+    # Trobem els contorns presents en la imatge (principalment les fitxes i els punts)
+    contours, hierarchy = cv.findContours(contorns,cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    # contours -> Llista de contorns (llista de llistes de punts que formen cada contorn)
+    # hierarchy ->Llista de relacions entre contorns
+    # estructura de hierarchy -> [Next, Previous, First_Child, Parent]
+    # el valor de cada camp referencia a un altre contorn
+    # si no fa referencia a cap contorn, valor = -1 p.e si un contorn no te cap contorn dins : First_Child = -1
+    #cv.imwrite('prova2222.png',contorns)
+    posicio = (0,0)
+    rotacioAlpha = 0.0
+    midaFitxa = (0,0) #w,h
+    for i,c in enumerate(contours):  
+        if hierarchy[0][i,3]==-1:
+            # Calculem els vertex maxim i minim i la rotacio del contorn            
+            rect = cv.minAreaRect(contours[i])  
+            # rect -> (center (x,y), (width, height), angle of rotation )
+            # Definim la posicio de la fitxa
+            posicio = rect[0]
+            # Definim la mida de la fitxa
+            midaFitxa = rect[1]
+            # Definim la rotacio alpha de la fitxa
+            rotacioAlpha = rect[2]
+            '''
+            #
+            #
+            #
+            M = cv.getRotationMatrix2D((im.shape[1]/2,im.shape[0]/2),rotacioAlpha,1)
+            dst = cv.warpAffine(im,M,(im.shape[1],im.shape[0]))
+            #
+            #
+            #
+            '''
+    if debug :
+        plt.figure()
+        plt.imshow(im)
+        print('Amplada: {}, Alcada: {}, Rotacio: {}'.format(midaFitxa[0],midaFitxa[1],rotacioAlpha))
+        print('Temps execució: %.3f segons' %(time.time()-start))
+
+    return (posicio,midaFitxa,rotacioAlpha)
+
+
 
 if __name__ == '__main__':
     frame = cv.imread('src/test1fitxa.png')    
