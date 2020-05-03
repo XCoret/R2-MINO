@@ -8,8 +8,8 @@ import math
 
 class C:
     PI = 3.14159
-    ARM_1 = 25
-    ARM_2 = 25
+    ARM_1 = 27.5
+    ARM_2 = 27.5
     OPEN_DEGREES = 0
     CLOSE_DEGREES = 45
     IDLE_X = 180

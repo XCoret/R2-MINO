@@ -18,55 +18,45 @@ orange = (255,153,0)
 heightW = 800
 widthW = 1600
 widthColumn = 600
-heightRow = heightW/2
+heightRow = round(heightW/2)
 
 ## TABLE ##
 tableSide = 400 ## mm
 laterals = 50 ##mm
-areaList = []
 
 ## BASE
 baseX= 1100
 baseY= 600
-baseHeight = 100 ##mm TODO ajustar
 baseRadius = 50 ## mm
 
 ## Arm A
-lenghtA = 250 ## mm
+lenghtA = 275 ## mm
 widthA = 25 ## mm
-AposX = baseX+lenghtA
+AposX = baseX + lenghtA
 AposY = 400
 degreeA = 0
 maxDegreeA = 360
 
 ## Arm B
-lenghtB = 250 ## mm
+lenghtB = 275 ## mm
 widthB = 25 ## mm
-BposX = AposX+lenghtB
+BposX = AposX + lenghtB
 BposY = 400
 degreeB = 0
 maxDegreeB = 360 ## 
 
 ## Arm C
 lengthC = 200 ##mm
-maxDegreeC = 180
-radiusC = 20 ##mm
-
 maxHeight = 60
 minHeight =140
+actualHeight = maxHeight
 isDown = False
 
+## Tool
 minOpening = 20
 maxOpening = 40
-
 actualOpening = maxOpening
 
-actualHeight = maxHeight
-
-autoRun = False
-
-count_test = 0
-setIdle = False
 
 ## INIT ##
 
@@ -83,64 +73,18 @@ armBReady = False
 hasStartedCatch = False
 hasStartedDrop = False
 
-#printLiftTool(True)
-#printOpenedTool(True)
+count_test1 = 0
+count_test2 = 0
+count_test3 = 0
+setIdle = False
 
 
-## FUNCTIONS ##
+## PRINT FUNCTIONS ##
 
-def resetDegrees():
-    return mov.idlePosition()
-
-def test1(count_test):
-    positions = [[0, 5], [25, 5], [25, 25], [25, 45], [0, 45], [-20, 45], [-20, 25], [-20, 5]]
-    (x, y) = mov.calculate_movement(positions[count_test][0], positions[count_test][1])
-    return x, y
-
-def test2(count_test, setIdle):
-    positions = [[10, 15], [10, 35], [-10, 35], [-10, 15], [0, 25]]
-
-    if setIdle == True:
-        (x, y) = resetDegrees()
-    else:
-        (x, y) = mov.calculate_movement(positions[count_test][0], positions[count_test][1])
-    
-    return x, y
-
-def test3 (count_test):
-    global hasStartedCatch
-    global hasStartedDrop
-    if(count_test == 0):
-        goTo(-22,44, False)
-        hasStartedCatch = True
-    elif(count_test == 1):
-        goTo(10,35, False)
-        hasStartedDrop = True
-    elif(count_test == 2):
-        goTo(10,35, True)
-
-def goTo(goX, goY, isIdle):
-    global next_degreeA
-    global next_degreeB
-    if isIdle:
-        next_degreeA, next_degreeB = resetDegrees()
-    else:
-        next_degreeA, next_degreeB = mov.calculate_movement(goX, goY)
-
-def drawTable():
+def drawTable(): 
     pygame.draw.rect(pWindow,greenTable,(baseX-round(tableSide/2),baseY-(tableSide + baseRadius), tableSide, tableSide))
     pygame.draw.rect(pWindow,orange,(baseX-round(tableSide/2)-laterals,baseY-(tableSide +baseRadius), laterals,tableSide))
     pygame.draw.rect(pWindow,orange,(baseX+round(tableSide/2),baseY-(tableSide +baseRadius), laterals,tableSide))
-
-def calculateFirstArm():
-    x = lenghtA * math.cos(math.radians(degreeA)) + baseX
-    y = lenghtA * math.sin(math.radians(degreeA+180)) + baseY
-    return x,y
-
-def calculateSecondArm():
-    x = lenghtB * math.cos(math.radians(degreeA + degreeB + 180))  + AposX
-    y = lenghtB * math.sin(math.radians(degreeA + degreeB + 360)) + AposY
-    return x,y
 
 def printGrid():
     pWindow.fill(white)
@@ -153,22 +97,6 @@ def printFirstCell():
 def printSecondCell():
     pygame.draw.line(pWindow, green, (0,heightRow+(heightRow/2)), (375,heightRow+(heightRow/2)), widthB)
 
-def printClosedTool(isLift):
-    if(isLift):
-        pygame.draw.line(pWindow, blue, (350,60+lengthC), (350+20,60+lengthC+50), 15)
-        pygame.draw.line(pWindow, blue, (350,60+lengthC), (350-20,60+lengthC+50), 15)
-    else:
-        pygame.draw.line(pWindow, blue, (350,140+lengthC), (350+20,140+lengthC+50), 15)
-        pygame.draw.line(pWindow, blue, (350,140+lengthC), (350-20,140+lengthC+50), 15)
-
-def printOpenedTool(isLift):
-    if(isLift):
-        pygame.draw.line(pWindow, blue, (350,60+lengthC), (350+40,60+lengthC+50), 15)
-        pygame.draw.line(pWindow, blue, (350,60+lengthC), (350-40,60+lengthC+50), 15)
-    else:
-        pygame.draw.line(pWindow, blue, (350,140+lengthC), (350+40,140+lengthC+50), 15)
-        pygame.draw.line(pWindow, blue, (350,140+lengthC), (350-40,140+lengthC+50), 15)
-
 def printLiftTool(actualHeight):
     pygame.draw.line(pWindow, orange, (350,actualHeight+20), (350,actualHeight+lengthC), widthB)
 
@@ -176,9 +104,47 @@ def printTool(actualHeight, actualOpening):
     pygame.draw.line(pWindow, red, (350,actualHeight+lengthC), (350+actualOpening,actualHeight+lengthC+50), 15)
     pygame.draw.line(pWindow, blue, (350,actualHeight+lengthC), (350-actualOpening,actualHeight+lengthC+50), 15)
 
-def printToolCell2():
-    pygame.draw.line(pWindow, blue, (350,lengthC+heightRow+50), (350,heightRow+(heightRow/2)), 15)
-    pygame.draw.line(pWindow, red, (350,lengthC+heightRow-50), (350,heightRow+(heightRow/2)), 15)
+def printToolCell2(degree):
+    centerX = 350
+    centerY = heightRow+(heightRow/2)
+    lenghtTool = 50
+    blueX = lenghtTool * math.cos(math.radians(degree+90)) + 350
+    blueY = lenghtTool * math.sin(math.radians(degree+90)) + lengthC + heightRow
+    redX = lenghtTool * math.cos(math.radians(degree-90)) + 350
+    redY =  lenghtTool * math.sin(math.radians(degree-90)) + lengthC + heightRow
+    pygame.draw.line(pWindow, blue, (blueX,blueY), (centerX,centerY), 15)
+    pygame.draw.line(pWindow, red, (redX,redY), (centerX,centerY), 15)
+
+## CALCULATE FUNCTIONS ##
+
+def resetDegrees():
+    return mov.idlePosition()
+
+def calculateFirstArm():
+    x = lenghtA * math.cos(math.radians(degreeA)) + baseX
+    y = lenghtA * math.sin(math.radians(degreeA+180)) + baseY
+    return x,y
+
+def calculateSecondArm():
+    x = lenghtB * math.cos(math.radians(degreeA + degreeB + 180))  + AposX
+    y = lenghtB * math.sin(math.radians(degreeA + degreeB + 360)) + AposY
+    return x,y
+
+def calculateDegreeTool(x, y):
+    degTool = math.degrees(math.atan2(y, x))
+    print(degTool)
+    return degTool
+
+## MOVEMENT FUNCTIONS ##
+
+def goTo(goX, goY, isIdle):
+    global next_degreeA
+    global next_degreeB
+    if isIdle:
+        next_degreeA, next_degreeB = resetDegrees()
+    else:
+        next_degreeA, next_degreeB = mov.calculate_movement(goX, goY)
+
 
 def upTool():
     global actualHeight
@@ -215,9 +181,13 @@ def closeTool():
         return True
     else:
         return False
+
+def rotateTool():
+    return False
     
 def catch():
     global hasStartedCatch
+    
     if downTool():
         return True
     elif closeTool():
@@ -240,6 +210,34 @@ def drop():
         hasStartedDrop = False
         return False
 
+## TESTS ##
+def test1():
+    positions = [[0, 5], [25, 5], [25, 25], [25, 45], [0, 45], [-20, 45], [-20, 25], [-20, 5]]
+    (x, y) = mov.calculate_movement(positions[count_test1][0], positions[count_test1][1])
+    #calculateDegreeTool(positions[count_test1][0], positions[count_test1][1])
+    return x, y
+
+def test2(setIdle):
+    positions = [[10, 15], [10, 35], [-10, 35], [-10, 15], [0, 25]]
+    if setIdle == True:
+        (x, y) = resetDegrees()
+    else:
+        (x, y) = mov.calculate_movement(positions[count_test2][0], positions[count_test2][1])
+    
+    return x, y
+
+def test3 ():
+    global hasStartedCatch
+    global hasStartedDrop
+    if(count_test3 == 0):
+        goTo(-22,44, False)
+        hasStartedCatch = True
+    elif(count_test3 == 1):
+        goTo(10,35, False)
+        hasStartedDrop = True
+    elif(count_test3 == 2):
+        goTo(10,35, True)
+
 
 ## MAIN ##
 
@@ -257,8 +255,9 @@ while True:
     printFirstCell()
     printLiftTool(actualHeight)
     printTool(actualHeight, actualOpening)
-    printToolCell2()
+    
     printSecondCell()
+    printToolCell2(0)
     
     for pEvent in pygame.event.get():
         if pEvent.type == QUIT:
@@ -266,28 +265,41 @@ while True:
             sys.exit()
         ## KEY controls
         elif pEvent.type == pygame.KEYDOWN:
+
+            # Test 2: movement + idle
             if pEvent.key == K_LEFT:
-                next_degreeA, next_degreeB = test2(count_test, setIdle)
-   
-                hasStartedCatch = True
-                hasStartedDrop = True
+                next_degreeA, next_degreeB = test2(setIdle)
+                hasStartedCatch = False
+                hasStartedDrop = False
                 if setIdle:
                     setIdle = False
                 else:
-                    count_test +=1
-                    setIdle = True
+                    count_test2 +=1
+                    setIdle = True 
+                if count_test2>4:
+                    count_test2 = 0
+                    
+            # Test 1: movement
             elif pEvent.key == K_RIGHT:
-                degreeA, degreeB = test1(count_test)
-                count_test +=1
+                next_degreeA, next_degreeB = test1()
+                count_test1 +=1
+                if count_test1>7:
+                    count_test1 = 0
+
+            # Test 3: catch + drop        
             if pEvent.key == K_UP:
-                test3 (count_test)
-                count_test +=1
+                test3()
+                count_test3 +=1
+                if count_test3>2:
+                    count_test3 = 0
+            
             elif pEvent.key == K_DOWN:
                 if degreeB>0:
                     degreeB-=1
         ## END KEY controls
 
 
+    ## Gradual increment of degreeA
     if round(degreeA,2) != next_degreeA:
         armAReady = False
         if(degreeA < next_degreeA):
@@ -295,9 +307,9 @@ while True:
         else:
             degreeA -=0.01
     else:
-        
         armAReady = True
-        #nex action
+
+     ## Gradual increment of degreeB
     if round(degreeB,2) != next_degreeB:
         armBReady = False
         if(degreeB < next_degreeB):
@@ -307,20 +319,13 @@ while True:
     else:
         armBReady = True
 
+    ## Flow control
     if armAReady and armBReady and hasStartedCatch:
         catch()
     if armAReady and armBReady and hasStartedDrop:
         drop()
 
+    ## Window update
     pygame.display.update()
-    #time.sleep(0.1)
 
-##    if(autoRun == True):
-##        degreeB+=1
-##        if degreeB > maxDegreeB:
-##            degreeB = 0
-##            degreeA += 1
-##            if degreeA > maxDegreeA:
-##                degreeA = 0
-        
     
