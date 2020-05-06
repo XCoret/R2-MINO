@@ -22,7 +22,7 @@ heightRow = round(heightW/2)
 
 ## TABLE ##
 tableSide = 400 ## mm
-laterals = 50 ##mm
+laterals = 100 ##mm
 
 ## BASE
 baseX= 1100
@@ -56,6 +56,10 @@ isDown = False
 minOpening = 20
 maxOpening = 40
 actualOpening = maxOpening
+degreeTool = 180
+nextDegreeTool = degreeTool
+maxDegreeTool = 360
+toolCompensation = 0
 
 
 ## INIT ##
@@ -67,8 +71,10 @@ pygame.display.set_caption("R2-MINO")
 degreeA, degreeB = mov.idlePosition()
 next_degreeA = degreeA
 next_degreeB = degreeB
+next_toolCompensation = toolCompensation
 armAReady = False
 armBReady = False
+compensationReady = False
 
 hasStartedCatch = False
 hasStartedDrop = False
@@ -76,44 +82,9 @@ hasStartedDrop = False
 count_test1 = 0
 count_test2 = 0
 count_test3 = 0
+count_test4 = 0
 setIdle = False
 
-
-## PRINT FUNCTIONS ##
-
-def drawTable(): 
-    pygame.draw.rect(pWindow,greenTable,(baseX-round(tableSide/2),baseY-(tableSide + baseRadius), tableSide, tableSide))
-    pygame.draw.rect(pWindow,orange,(baseX-round(tableSide/2)-laterals,baseY-(tableSide +baseRadius), laterals,tableSide))
-    pygame.draw.rect(pWindow,orange,(baseX+round(tableSide/2),baseY-(tableSide +baseRadius), laterals,tableSide))
-
-def printGrid():
-    pWindow.fill(white)
-    pygame.draw.line(pWindow, black, (widthColumn,0), (widthColumn, heightW))
-    pygame.draw.line(pWindow, black, (0,heightRow), (widthColumn, heightRow))
-
-def printFirstCell():
-    pygame.draw.line(pWindow, green, (0,heightRow/2), (375,heightRow/2), widthB)
-
-def printSecondCell():
-    pygame.draw.line(pWindow, green, (0,heightRow+(heightRow/2)), (375,heightRow+(heightRow/2)), widthB)
-
-def printLiftTool(actualHeight):
-    pygame.draw.line(pWindow, orange, (350,actualHeight+20), (350,actualHeight+lengthC), widthB)
-
-def printTool(actualHeight, actualOpening):
-    pygame.draw.line(pWindow, red, (350,actualHeight+lengthC), (350+actualOpening,actualHeight+lengthC+50), 15)
-    pygame.draw.line(pWindow, blue, (350,actualHeight+lengthC), (350-actualOpening,actualHeight+lengthC+50), 15)
-
-def printToolCell2(degree):
-    centerX = 350
-    centerY = heightRow+(heightRow/2)
-    lenghtTool = 50
-    blueX = lenghtTool * math.cos(math.radians(degree+90)) + 350
-    blueY = lenghtTool * math.sin(math.radians(degree+90)) + lengthC + heightRow
-    redX = lenghtTool * math.cos(math.radians(degree-90)) + 350
-    redY =  lenghtTool * math.sin(math.radians(degree-90)) + lengthC + heightRow
-    pygame.draw.line(pWindow, blue, (blueX,blueY), (centerX,centerY), 15)
-    pygame.draw.line(pWindow, red, (redX,redY), (centerX,centerY), 15)
 
 ## CALCULATE FUNCTIONS ##
 
@@ -130,11 +101,78 @@ def calculateSecondArm():
     y = lenghtB * math.sin(math.radians(degreeA + degreeB + 360)) + AposY
     return x,y
 
-def calculateDegreeTool(x, y):
-    degTool = math.degrees(math.atan2(y, x))
-    print(degTool)
-    return degTool
+def calculateSlide(degA, degB):
+    x = math.cos(math.radians(degA))* math.sin(math.radians(degB)) + math.sin(math.radians(degA))* math.cos(math.radians(degB))
+    y = math.sin(math.radians(degA))* math.sin(math.radians(degB)) - math.cos(math.radians(degA))* math.cos(math.radians(degB))
+    deg = math.degrees(math.atan2(y, x))
+    print(deg)
 
+def calculateSecondArmAngle():
+    x = round(BposX) - round(AposX)
+    y = round(BposY) - round(AposY)
+    degree =  math.degrees(math.atan2(y, x))
+    return degree
+
+def calculateToolAngleForPrint():
+    return degreeTool + calculateSecondArmAngle()
+
+def calculateIdleDegreeTool():
+    x = round(BposX) - round(AposX)
+    y = round(BposY) - round(AposY)
+    degree = math.degrees(math.atan2(y, x))
+    return degree + degreeTool
+
+
+## PRINT FUNCTIONS ##
+
+def drawTable(): 
+    pygame.draw.rect(pWindow,greenTable,(baseX-round(tableSide/2),baseY-(tableSide + baseRadius), tableSide, tableSide))
+    pygame.draw.rect(pWindow,orange,(baseX-round(tableSide/2)-laterals,baseY-(tableSide +baseRadius), laterals,tableSide))
+    pygame.draw.rect(pWindow,orange,(baseX+round(tableSide/2),baseY-(tableSide +baseRadius), laterals,tableSide))
+
+def printGrid():
+    pWindow.fill(white)
+    pygame.draw.line(pWindow, black, (widthColumn,0), (widthColumn, heightW))
+    pygame.draw.line(pWindow, black, (0,heightRow), (widthColumn, heightRow))
+
+def printFirstCell():
+    pygame.draw.line(pWindow, green, (0,round(heightRow/2)), (375,round(heightRow/2)), widthB)
+
+def printSecondCell():
+    pygame.draw.line(pWindow, green, (0,heightRow+round(heightRow/2)), (375,heightRow+round(heightRow/2)), widthB)
+
+def printLiftTool(actualHeight):
+    pygame.draw.line(pWindow, orange, (350,actualHeight+20), (350,actualHeight+lengthC), widthB)
+
+def printTool(actualHeight, actualOpening):
+    pygame.draw.line(pWindow, red, (350,actualHeight+lengthC), (350+actualOpening,actualHeight+lengthC+50), 15)
+    pygame.draw.line(pWindow, blue, (350,actualHeight+lengthC), (350-actualOpening,actualHeight+lengthC+50), 15)
+
+def printToolCell2(degree):
+    centerX = 350
+    centerY = round(heightRow+(heightRow/2))
+    lenghtTool = 50
+    blueX = lenghtTool * math.cos(math.radians(degree+90)) + 350
+    blueY = lenghtTool * math.sin(math.radians(degree+90)) + lengthC + heightRow
+    redX = lenghtTool * math.cos(math.radians(degree-90)) + 350
+    redY =  lenghtTool * math.sin(math.radians(degree-90)) + lengthC + heightRow
+    pygame.draw.line(pWindow, blue, (round(blueX),round(blueY)), (centerX,centerY), 15)
+    pygame.draw.line(pWindow, red, (round(redX),round(redY)), (centerX,centerY), 15)
+
+def printToolPrincipal(degree):
+    centerX, centerY = calculateSecondArm()
+    
+    lenghtTool = 50
+    blueX = lenghtTool * math.cos(math.radians(calculateToolAngleForPrint()+90)) + centerX
+    blueY = lenghtTool * math.sin(math.radians(calculateToolAngleForPrint()+90)) + centerY
+    redX = lenghtTool * math.cos(math.radians(calculateToolAngleForPrint()-90)) + centerX
+    redY =  lenghtTool * math.sin(math.radians(calculateToolAngleForPrint()-90)) + centerY
+    pygame.draw.line(pWindow, blue, (round(blueX),round(blueY)), (centerX,centerY), 15)
+    pygame.draw.line(pWindow, red, (round(redX),round(redY)), (centerX,centerY), 15)
+    
+
+    
+ 
 ## MOVEMENT FUNCTIONS ##
 
 def goTo(goX, goY, isIdle):
@@ -144,7 +182,6 @@ def goTo(goX, goY, isIdle):
         next_degreeA, next_degreeB = resetDegrees()
     else:
         next_degreeA, next_degreeB = mov.calculate_movement(goX, goY)
-
 
 def upTool():
     global actualHeight
@@ -183,6 +220,7 @@ def closeTool():
         return False
 
 def rotateTool():
+        
     return False
     
 def catch():
@@ -214,7 +252,6 @@ def drop():
 def test1():
     positions = [[0, 5], [25, 5], [25, 25], [25, 45], [0, 45], [-20, 45], [-20, 25], [-20, 5]]
     (x, y) = mov.calculate_movement(positions[count_test1][0], positions[count_test1][1])
-    #calculateDegreeTool(positions[count_test1][0], positions[count_test1][1])
     return x, y
 
 def test2(setIdle):
@@ -238,6 +275,26 @@ def test3 ():
     elif(count_test3 == 2):
         goTo(10,35, True)
 
+def test4():
+    global nextDegreeTool
+    positions = ["N", "N", "N", "N", "N", "N", "N"]
+    nextDegreeTool = mov.operateToolRotate(positions[count_test4], degreeA, degreeB, degreeTool)
+    print("A: ", degreeA, " B: ", degreeB, " C: ", degreeTool)
+    print("New degree: ",nextDegreeTool)
+    
+
+def wtf():
+    baseX = lenghtA * math.cos(math.radians(degreeA))
+    baseY = lenghtA * math.sin(math.radians(degreeB+180))
+
+    toolX = lenghtB * math.cos(math.radians(degreeA + degreeB + 180))  + baseX
+    toolY = lenghtB * math.sin(math.radians(degreeA + degreeB + 360)) + baseY
+
+    x = round(toolX) - round(baseX)
+    y = round(toolY) - round(baseY)
+    degree =  math.degrees(math.atan2(y, x))
+    print("degreeC: ", degreeTool, " degreeB: ", degree)
+    
 
 ## MAIN ##
 
@@ -252,13 +309,19 @@ while True:
     (BposX,BposY) = calculateSecondArm()
     pygame.draw.line(pWindow, green, (round(AposX),round(AposY)), (round(BposX),round(BposY)), widthB)
 
+    printToolPrincipal(calculateIdleDegreeTool())
+
     printFirstCell()
     printLiftTool(actualHeight)
     printTool(actualHeight, actualOpening)
     
     printSecondCell()
-    printToolCell2(0)
-    
+    printToolCell2(degreeTool)
+    calculateSecondArmAngle()
+
+    #wtf()
+
+
     for pEvent in pygame.event.get():
         if pEvent.type == QUIT:
             pygame.quit()
@@ -282,6 +345,7 @@ while True:
             # Test 1: movement
             elif pEvent.key == K_RIGHT:
                 next_degreeA, next_degreeB = test1()
+                calculateSlide(next_degreeA, next_degreeB)
                 count_test1 +=1
                 if count_test1>7:
                     count_test1 = 0
@@ -292,10 +356,13 @@ while True:
                 count_test3 +=1
                 if count_test3>2:
                     count_test3 = 0
-            
+
+            # Test 4: tool
             elif pEvent.key == K_DOWN:
-                if degreeB>0:
-                    degreeB-=1
+                test4()
+                count_test4 +=1
+                if count_test4>6:
+                    count_test4 = 0
         ## END KEY controls
 
 
@@ -309,7 +376,7 @@ while True:
     else:
         armAReady = True
 
-     ## Gradual increment of degreeB
+    ## Gradual increment of degreeB
     if round(degreeB,2) != next_degreeB:
         armBReady = False
         if(degreeB < next_degreeB):
@@ -318,6 +385,15 @@ while True:
             degreeB -=0.01
     else:
         armBReady = True
+
+    ## Gradual increment of compensationTool
+    if round(degreeTool,2) != round(nextDegreeTool,2):
+ 
+        if(degreeTool < nextDegreeTool):
+            degreeTool +=0.05
+        else:
+            degreeTool -=0.05
+   
 
     ## Flow control
     if armAReady and armBReady and hasStartedCatch:
