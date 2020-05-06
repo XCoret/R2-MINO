@@ -15,6 +15,7 @@ class C:
     IDLE_X = 180
     IDLE_Y = 90
     LIFT_VALUE= 360
+    IDLE_TOOL = 180
     
 
     pos = 0
@@ -56,15 +57,25 @@ class C:
         else:
             return self.CLOSE_DEGREES
 
-    def operateToolRotate(self, direction):
+    def operateToolRotate(self, direction, angulo1, angulo2, angulo3):
+        baseX = self.ARM_1 * math.cos(math.radians(angulo1))
+        baseY = self.ARM_1 * math.sin(math.radians(angulo2+180))
+
+        toolX = self.ARM_2 * math.cos(math.radians(angulo1 + angulo2 + 180))  + baseX
+        toolY = self.ARM_2 * math.sin(math.radians(angulo1 + angulo2 + 360)) + baseY
+
+        x = round(toolX) - round(baseX)
+        y = round(toolY) - round(baseY)
+        degree =  math.degrees(math.atan2(y, x))
+
         if (direction == "N"):
-            return 0
+            return (90 - angulo1 - angulo2 +180 +180) %360
         elif (direction == "S"):
-            return 180
+            return 270 - angulo1 - angulo2
         elif (direction == "E"):
-            return 90
+            return 0 - angulo1 - angulo2
         elif (direction == "W"):
-            return 270
+            return 180 - angulo1 - angulo2
             
     def operateToolLift(self, isLift):
         if(isLift):
@@ -77,6 +88,7 @@ class C:
 
     def moveTo(self, x_pos, y_pos):
         return calculate_movement(x_pos, y_pos)
+        
     
 
 ''' test that will be on calcul module '''
