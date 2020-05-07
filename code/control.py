@@ -38,6 +38,7 @@ if __name__ == '__main__':
         #7 peçes repartides a cada jugador (MANUAL)
         #14 peçes restants, al pou (girades) (MANUAL)
         #IDLE
+        m.idlePosition()
         
         if (isSetup):
             #Llegir mans
@@ -64,12 +65,15 @@ if __name__ == '__main__':
 
         while(isGame):
             
-            if(toggleTurn):
+            if(toggleTurn and not skipButton):
                 playTurn(firstTurn)
                 toggleTurn = False
-            else:
-                playTurn(secondTurn)
-                toggleTurn = True
+            elif:
+                if(skiprobot):
+                    m.signalPass()
+                else:
+                    playTurn(secondTurn)
+                    toggleTurn = True
 
             if(skipButton and skipRobot):
                 isGame = False
@@ -109,12 +113,12 @@ def playTurn(player):
     playing = True
 
     #IDLE
+    m.idleposition()
     
     if(player == "h"):
         global skipButton
         while playing:
             
-            #wait for vision to say something
             newToken = v.getIfNewTokenOnBoard() #COMENATR PER FER
 
             humanHand = v.getHumanHand()
@@ -135,7 +139,7 @@ def playTurn(player):
             #Demanar diccionary estat
             dictionary = v.getBoardState() #COMENATR PER FER
             robotHand = v.getRobotHand()
-            well = v.getWellState()
+            well = v.getWellState() #COMENATR PER FER
 
             #Demanar accio
             action, tokenH, tokenB = d.doAction(dictionary, robotHand, well) #FER A DOMINO, arreglar amb tipus de dades
@@ -167,12 +171,19 @@ def playTurn(player):
                 m.action("c", orientationNT) #Arreglar al moviment (bloqeuix fins que acaba)
 
                 m.moveTo(coordinatesnewTokenHand[0], coordinatesnewTokenHand[1])
-                m.action("d", orientationNTH)
+                m.action("d", orientationNTH) #ARREGLAT
 
                 #IDLE
+                m.idlePosition()
 
             elif(action == "p"):
                 skipRobot = True
+                m.signalPass() #FER a MOVIEMTN
                 
             time.sleep(1)
         
+
+
+
+
+def pygmageIdle

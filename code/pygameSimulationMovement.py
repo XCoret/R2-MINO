@@ -48,7 +48,7 @@ maxDegreeB = 360 ##
 ## Arm C
 lengthC = 200 ##mm
 maxHeight = 60
-minHeight =140
+minHeight = 140
 actualHeight = maxHeight
 isDown = False
 
@@ -236,7 +236,7 @@ def openTool():
     
     while True:
         printRutine()
-        if(actualOpening < maxOpening):
+        if(actualOpening < m.operateToolOpen(True)):
             actualOpening +=0.05
         else:
             pygame.display.update()
@@ -248,7 +248,7 @@ def closeTool():
 
     while True:
         printRutine()
-        if(actualOpening > minOpening):
+        if(actualOpening > m.operateToolOpen(False)):
             actualOpening -=0.05
         else:
             pygame.display.update()
@@ -260,7 +260,7 @@ def upTool():
 
     while True:
         printRutine()
-        if(actualHeight > maxHeight):
+        if(actualHeight > operateToolLift(True)):
             actualHeight -=0.05
         else:
             pygame.display.update()
@@ -272,7 +272,7 @@ def downTool():
 
     while True:
         printRutine()
-        if(actualHeight < minHeight):
+        if(actualHeight < operateToolLift(False)):
             actualHeight +=0.05
         else:
             pygame.display.update()

@@ -10,11 +10,11 @@ class C:
     PI = 3.14159
     ARM_1 = 27.5
     ARM_2 = 27.5
-    OPEN_DEGREES = 0
-    CLOSE_DEGREES = 45
+    OPEN_DEGREES = 40
+    CLOSE_DEGREES = 20
     IDLE_X = 190
     IDLE_Y = 100
-    LIFT_VALUE= 360
+    LIFT_VALUE= 60
     IDLE_TOOL = 180    
 
     pos = 0
@@ -70,7 +70,7 @@ class C:
         if(isLift):
             return self.LIFT_VALUE
         else:
-            return 0
+            return 140
 
     def idlePosition(self):
         return (self.IDLE_X, self.IDLE_Y)
