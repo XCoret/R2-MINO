@@ -12,8 +12,8 @@ class C:
     ARM_2 = 27.5
     OPEN_DEGREES = 0
     CLOSE_DEGREES = 45
-    IDLE_X = 180
-    IDLE_Y = 90
+    IDLE_X = 190
+    IDLE_Y = 100
     LIFT_VALUE= 360
     IDLE_TOOL = 180    
 
@@ -56,25 +56,15 @@ class C:
         else:
             return self.CLOSE_DEGREES
 
-    def operateToolRotate(self, direction, angulo1, angulo2, angulo3):
-        baseX = self.ARM_1 * math.cos(math.radians(angulo1))
-        baseY = self.ARM_1 * math.sin(math.radians(angulo2+180))
-
-        toolX = self.ARM_2 * math.cos(math.radians(angulo1 + angulo2 + 180))  + baseX
-        toolY = self.ARM_2 * math.sin(math.radians(angulo1 + angulo2 + 360)) + baseY
-
-        x = round(toolX) - round(baseX)
-        y = round(toolY) - round(baseY)
-        degree =  math.degrees(math.atan2(y, x))
-
+    def operateToolRotate(self, direction):
         if (direction == "N"):
-            return (90 - angulo1 - angulo2 +180 +180) %360
+            return 270
         elif (direction == "S"):
-            return 270 - angulo1 - angulo2
+            return 90
         elif (direction == "E"):
-            return 0 - angulo1 - angulo2
+            return 0
         elif (direction == "W"):
-            return 180 - angulo1 - angulo2
+            return 180
             
     def operateToolLift(self, isLift):
         if(isLift):
@@ -90,9 +80,9 @@ class C:
         
     def signalPlayer(self, player):
         if (player == "h"):
-            return (25, 25)
+            return self.calculate_movement(25, 25)
         elif (player == "r"):
-            return (-25, 25)
+            return self.calculate_movement(-25, 25)
         
 ''' test that will be on calcul module '''
 #c = C()
