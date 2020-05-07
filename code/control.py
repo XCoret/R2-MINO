@@ -55,6 +55,7 @@ if __name__ == '__main__':
             m.signalPlayer(firstTurn) #FER A MOVIMENT (ull a bloquejar-se fins acabar, posar en IDLE)
 
             #IDLE
+            m.idlePosition()
             
             time.sleep(5)
             

@@ -15,8 +15,7 @@ class C:
     IDLE_X = 180
     IDLE_Y = 90
     LIFT_VALUE= 360
-    IDLE_TOOL = 180
-    
+    IDLE_TOOL = 180    
 
     pos = 0
 
@@ -89,8 +88,12 @@ class C:
     def moveTo(self, x_pos, y_pos):
         return calculate_movement(x_pos, y_pos)
         
-    
-
+    def signalPlayer(self, player):
+        if (player == "h"):
+            return (25, 25)
+        elif (player == "r"):
+            return (-25, 25)
+        
 ''' test that will be on calcul module '''
 #c = C()
 #c.calculate_movement(20, 45)
