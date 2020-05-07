@@ -320,6 +320,29 @@ def drop(pX, pY, orientation):
     downTool()
     openTool()
     upTool()
+
+def dance():
+    goTo(0, 20, False)
+    goTo(5, 25, False)
+    goTo(0, 30, False)
+    closeTool()
+    openTool()
+    goTo(-5, 25, False)
+    goTo(0, 20, False)
+    closeTool()
+    openTool()
+    closeTool()
+    openTool()
+    goTo(-5, 25, False)
+    goTo(0, 30, False)
+    closeTool()
+    openTool()
+    goTo(5, 25, False)
+    goTo(0, 20, False)
+    closeTool()
+    openTool()
+    closeTool()
+    openTool()
     
 ## TESTS ##
 def test1():
@@ -384,8 +407,9 @@ while True:
 
             # Test 2: movement + idle
             if pEvent.key == K_LEFT:
-                catch(0, 25, "N")
-                drop(-25, 25, "S")
+                #catch(0, 25, "N")
+                #drop(-25, 25, "S")
+                dance()
     pygame.display.update()
 
 ##    for pEvent in pygame.event.get():
