@@ -218,7 +218,7 @@ def doAction(gameDictionary):
          if len(possibleTokens) == 0:
             if len(well) == 0:
                 # PASSAR
-                return "p", None, none
+                return "p", None, None
             else:
                 # firstToken = getRandomTokenFromWell(well)
                 # secondToken = getEmptySpaceFromHand(robotHand)
@@ -251,5 +251,5 @@ e1={
     },
     'pou':{}
 }
-
+XD 
 doAction(e1)
