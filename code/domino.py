@@ -77,7 +77,7 @@ def getFirstTurn(gameDictionary):
             print("Winner HUMAN with: [", maxFirstHuman, ",", maxSecondHuman, "] TOTAL:", maxSumHuman)
             return "h" 
 
-def getWinner(gameDictionary):
+def getWinner(gameDictionary, firstTurn):
     humanHand = gameDictionary["maHuma"]
     robotHand = gameDictionary["maRobot"]
 
@@ -110,8 +110,11 @@ def getWinner(gameDictionary):
         return "h"
     elif pointsRobot == pointsHuman:
         print("EMPAT, guanya qui té el torn")
-        return "e"
+        return firstTurn
 
+#return "t" -> tirar
+#return "a" -> agafar
+#return "p" -> passar
 def doAction(gameDictionary):
     robotHand = gameDictionary["maRobot"]
     board = gameDictionary["taulell"]

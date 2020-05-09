@@ -1,4 +1,4 @@
-def getWinner(gameDictionary):
+def getWinner(gameDictionary, firstTurn):
     humanHand = gameDictionary["maHuma"]
     robotHand = gameDictionary["maRobot"]
 
@@ -31,7 +31,7 @@ def getWinner(gameDictionary):
         return "h"
     elif pointsRobot == pointsHuman:
         print("EMPAT, guanya qui té el torn")
-        return "e"
+        return firstTurn
 
 
 # ROBOT WIN
@@ -100,12 +100,16 @@ e3={
     'pou':{}
 }
 
-print("RETURN: ",getWinner(e1))
+print("RETURN: ",getWinner(e1,"h"))
 print(" ")
 print(" ")
 print(" ")
-print("RETURN: ",getWinner(e2))
+print("RETURN: ",getWinner(e2, "h"))
 print(" ")
 print(" ")
 print(" ")
-print("RETURN: ",getWinner(e3))
+print("RETURN: ",getWinner(e2, "r"))
+print(" ")
+print(" ")
+print(" ")
+print("RETURN: ",getWinner(e3, "r"))

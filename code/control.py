@@ -94,8 +94,8 @@ if __name__ == '__main__':
                 robotHand = v.getRobotHand()
                 gameStatus = v.getGameStatus() #?
 
-                winner = d.getWinner(humanHand, robotHand) #FER A DOMINO
-                winner = d.getWinner(gameStatus)
+                winner = d.getWinner(humanHand, robotHand, firstTurn) #FER A DOMINO
+                winner = d.getWinner(gameStatus, firstTurn)
                 
     m.dance() #FER A MOVIMENT
 
