@@ -142,7 +142,23 @@ def setNewPosition(token, x, y, o):
     newToken[0] = (x,y,4,2)
     newToken[2] = o
     return newToken
-    
+
+def common_elements(list1, list2):
+    result = []
+    for element in list1:
+        if element in list2:
+            result.append(element)
+    return result
+
+def getTokenToPlay(numbers, hand):
+    possibleTokens =  {}
+    for key in hand:
+        token = hand[key]
+        tokenValues = token[1]
+        commons = common_elements(tokenValues, numbers)
+        for i in commons:
+            possibleTokens[i] = key
+    return possibleTokens
 
 # return action, cToken0, cToken1
 # action "t" -> tirar
@@ -160,7 +176,7 @@ def doAction(gameDictionary):
     ending1, ending2, contiguous1, contiguous2 = getEndings(board)
 
 
-    if tokensInBoard == 0:
+    if len(board) == 0:
         md, ms, indexMaxRobot, indexDoubleRobot = getDoublesAndMax(robotHand)
         if indexDoubleRobot != -1:
             cToken0 = robotHand[indexDoubleRobot]
@@ -172,14 +188,40 @@ def doAction(gameDictionary):
         o = 1
         cToken1 =setNewPosition(cToken0, x, y, o)
         print("old:", cToken0, " new: ", cToken1)
+    elif len(board) == 1:
+        tokenBoard = board[0]
+        possibleNumbers = tokenBoard[1]
+        possibleTokens = getTokenToPlay(possibleNumbers, robotHand)
+        if len(possibleTokens) == 0:
+            if len(well) == 0:
+                # TODO afegir altres params
+                return "p"
+            else:
+                # TODO afegir altres params
+                return "a"
+        else:
+            #choose best token
+            # TODO afegir altres params
+            return "t"
         
-    
+    elif len(board) > 1:
+        #getEndings
+        #get possible numbers
+        #get possible tokens
+         if len(possibleTokens) == 0:
+            if len(well) == 0:
+                # TODO afegir altres params
+                return "p"
+            else:
+                # TODO afegir altres params
+                return "a"
+        else:
+            #choose best token
+            # TODO afegir altres params
+            return "t"
 
-    #intenta tirar segons regles del domino
 
-    #Si no es pot tirar return
-
-
+## TESTS ##
 e1={
     'maRobot':{ 
             #idFitxa : [ (x,y,amplada,alçada), [ puntsEsquerra/Dalt, puntsDreta/Baix], orientació]
