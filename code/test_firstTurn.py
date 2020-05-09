@@ -1,3 +1,33 @@
+def getDoublesAndMax(hand):
+    maxDouble = -1
+    maxSum = 0
+
+    maxFirst = -1
+    maxSecond = -1
+
+    indexMax = -1
+    indexDouble = -1
+    
+    for key in hand:
+        token = hand[key]
+        numbers = token[1]
+        first = numbers[0]
+        second = numbers[1]
+        sumNumbers = first + second
+        #Buscar fitxa mès alta
+        if sumNumbers > maxSum:
+            maxSum = sumNumbers
+            maxFirst = first
+            maxSecond = second
+            indexMax = key
+        #Buscar per dobles
+        if(first == second and first > maxDouble):
+            maxDouble = first
+            indexDouble = key
+
+    return maxDouble, maxSum, indexMax, indexDouble
+            
+
 def getFirstTurn(gameDictionary):
     humanHand = gameDictionary["maHuma"]
     robotHand = gameDictionary["maRobot"]
@@ -12,36 +42,9 @@ def getFirstTurn(gameDictionary):
     
     maxFirstHuman = -1
     maxSecondHuman = -1
-     
-    for key in robotHand:
-        token = robotHand[key]
-        numbers = token[1]
-        first = numbers[0]
-        second = numbers[1]
-        sumNumbers = first + second
-        #Buscar fitxa mès alta
-        if sumNumbers > maxSumRobot:
-            maxSumRobot = sumNumbers
-            maxFirstRobot = first
-            maxSecondRobot = second
-        #Buscar per dobles
-        if(first == second and first > maxDoubleRobot):
-            maxDoubleRobot = first
 
-    for key in humanHand:
-        token = humanHand[key]
-        numbers = token[1]
-        first = numbers[0]
-        second = numbers[1]
-        sumNumbers = first + second
-        #Buscar fitxa mès alta
-        if sumNumbers > maxSumHuman:
-            maxSumHuman = sumNumbers
-            maxFirstHuman = first
-            maxSecondHuman = second
-        #Buscar per dobles
-        if(first == second and first > maxDoubleHuman):
-            maxDoubleHuman = first
+    maxDoubleRobot, maxSumRobot, indexMaxRobot, indexDoubleRobot = getDoublesAndMax(robotHand)
+    maxDoubleHuman, maxSumHuman, indexMaxHuman, indexDoubleHuman = getDoublesAndMax(humanHand)
 
     print("-----------------------------------------------------------------------")
     print("maxDoubleRobot: ", maxDoubleRobot, " maxDoubleHuman: ", maxDoubleHuman)
