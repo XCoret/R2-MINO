@@ -150,7 +150,7 @@ def common_elements(list1, list2):
             result.append(element)
     return result
 
-def getTokenToPlay(numbers, hand):
+def getPossibleTokensToPlay(numbers, hand):
     possibleTokens =  {}
     for key in hand:
         token = hand[key]
@@ -164,61 +164,71 @@ def getTokenToPlay(numbers, hand):
 # action "t" -> tirar
 # action "a" -> agafar
 # action "p" -> passar
-# cToken0: token a moure
-# cToken1: token resultant de moure cToken0
+# firstToken: token a moure
+# secondToken: token resultant de moure cToken0
 def doAction(gameDictionary):
     robotHand = gameDictionary["maRobot"]
     board = gameDictionary["taulell"]
     well = gameDictionary["pou"]
 
+    firstToken = None
+    secondToken = None
     tokensInBoard = len(board)
     
-    ending1, ending2, contiguous1, contiguous2 = getEndings(board)
-
-
     if len(board) == 0:
+        ## la partida acaba de començar
         md, ms, indexMaxRobot, indexDoubleRobot = getDoublesAndMax(robotHand)
         if indexDoubleRobot != -1:
-            cToken0 = robotHand[indexDoubleRobot]
+            firstToken = robotHand[indexDoubleRobot]
         else:
-            cToken0 = robotHand[indexMaxRobot]
+            firstToken = robotHand[indexMaxRobot]
 
+        # center table
         x = 30
         y = 30
         o = 1
-        cToken1 =setNewPosition(cToken0, x, y, o)
-        print("old:", cToken0, " new: ", cToken1)
+        secondToken = setNewPosition(firstToken, x, y, o)
+        #TIRAR
+        return "t", firstToken, secondToken
+        
     elif len(board) == 1:
         tokenBoard = board[0]
         possibleNumbers = tokenBoard[1]
-        possibleTokens = getTokenToPlay(possibleNumbers, robotHand)
+        possibleTokens = getPossibleTokensToPlay(possibleNumbers, robotHand)
         if len(possibleTokens) == 0:
             if len(well) == 0:
-                # TODO afegir altres params
-                return "p"
+                # PASSAR
+                return "p", None, None
             else:
-                # TODO afegir altres params
-                return "a"
+                # firstToken = getRandomTokenFromWell(well)
+                # secondToken = getEmptySpaceFromHand(robotHand)
+                # AGAFAR
+                return "a", firstToken, secondToken
         else:
-            #choose best token
-            # TODO afegir altres params
-            return "t"
+            # choose best token from possibleTokens
+            # firstToken, endingUsed = getBestOption(possibleTokens)
+            # secondToken = calculateNewPosition(firstToken, tokenBoard)
+            # TIRAR
+            return "t", firstToken, secondToken
         
     elif len(board) > 1:
-        #getEndings
-        #get possible numbers
-        #get possible tokens
+        ending1, ending2, contiguous1, contiguous2 = getEndings(board)
+        # possibleNumbers = getPossibleNumbers(ending1, ending2, contiguous1, contiguous2)
+        # possibleTokens = getPossibleTokensToPlay(possibleNumbers, robotHand)
          if len(possibleTokens) == 0:
             if len(well) == 0:
-                # TODO afegir altres params
-                return "p"
+                # PASSAR
+                return "p", None, none
             else:
-                # TODO afegir altres params
-                return "a"
+                # firstToken = getRandomTokenFromWell(well)
+                # secondToken = getEmptySpaceFromHand(robotHand)
+                # AGAFAR
+                return "a", firstToken, secondToken
         else:
-            #choose best token
-            # TODO afegir altres params
-            return "t"
+            # choose best token from possibleTokens
+            # firstToken, endingUsed = getBestOption(possibleTokens)
+            # secondToken = calculateNewPosition(firstToken, endingUsed)
+            return "t", firstToken, secondToken
 
 
 ## TESTS ##
