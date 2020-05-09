@@ -11,53 +11,32 @@ Classe fitxa:
     orientacio : (0:horitzontal, 1:vertical)
 '''
 print('Modul Joc Carregat!')
-class Fitxa:
-    def __init__(self, vA,vB,orientacio):
-        self.vA = vA
-        self.vB = vB
-        self.orientacio = orientacio
 
-def func():
-    fitxes=[]
-    for a in range(7):
-        for b in range(7-a):
-            fitxes.append(Fitxa(a,b,1))
-        #print(a)
-        
-    for f in fitxes:
-        print(str(f.vA)+' '+str(f.vB))
-    print(len(fitxes))
+def getFirstTurn(gameDictionary):
+    humanHand = gameDictionary["maHuma"]
+    robotHand = gameDictionary["maRobot"]
 
-#Contra opció
-class playerAlgorithm:
+    #Buscar per dobles
 
-    def __init__(self, playerType):
-        print ("Constructor")
-        self.__playerType = playerType
+    #Buscar fitxa mès alta
 
-    def humanLoop(self):
-        #wait: Nova peça apareix, no queden peces al pou per primera vegada i el jugador no pot tirar (revisar des de visió)
-        return false
-    def robotLoop(self):
-        playing = true
+    return "h" o "r"
 
-        while(playing):
-            #Hi ha fitxa disponible que encaixi en valor amb algun dels extrems?
-            if(validToken):
-                #Col·locarla
-                playing = false
-                return token #peça a col·locar
-            else:
-                if(moreTokens): #Que encara hi ha peces al pou
-                    #Agafar fitxa del pou
-                else:
-                    #Passar torn
-                    playing = false
-                    return false
+def getWinner(gameDictionary):
+    humanHand = gameDictionary["maHuma"]
+    robotHand = gameDictionary["maRobot"]
 
+    #Comptar les fitxes de cada mà
 
-    def playTurn(self):
-        if(self.__playerType == "h"):
-            return humanLoop()
-        elif(self.__playerType == "r"):
-            return robotLoop()
+    return "h" o "r"
+
+def doAction(gameDictionary):
+    robotHand = gameDictionary["maRobot"]
+    board = gameDictionary["taulell"]
+    well = gameDictionary["pou"]
+
+    #intenta tirar segons regles del domino
+
+    #Si no es pot tirar return
+
+    

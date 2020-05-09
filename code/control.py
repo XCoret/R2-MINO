@@ -38,13 +38,16 @@ if __name__ == '__main__':
         #7 peçes repartides a cada jugador (MANUAL)
         #14 peçes restants, al pou (girades) (MANUAL)
         #IDLE
+        m.idlePosition()
         
         if (isSetup):
             #Llegir mans
             humanHand = v.getHumanHand() #COMENATR PER FER
             robotHand = v.getRobotHand() #COMENATR PER FER
+            gameStatus = v.getGameStatus() #?
 
             firstTurn = d.getFirstTurn(humanHand, robotHand) #FER A DOMINO
+            firstTurn = d.getFirstTurn(gameStatus) #?
 
             if (firstTurn == "h"):
                 secondTrun = "r"
@@ -52,7 +55,7 @@ if __name__ == '__main__':
                 secondTrun = "h"
             
             #Robot senyala el que té el doble mès gran per començar
-            m.signalPlayer(firstTurn) #FER A MOVIMENT (ull a bloquejar-se fins acabar, posar en IDLE)
+            m.signalPlayer(firstTurn)
 
             #IDLE
             m.idlePosition()
@@ -64,12 +67,15 @@ if __name__ == '__main__':
 
         while(isGame):
             
-            if(toggleTurn):
+            if(toggleTurn and not skipButton):
                 playTurn(firstTurn)
                 toggleTurn = False
-            else:
-                playTurn(secondTurn)
-                toggleTurn = True
+            elif:
+                if(skiprobot):
+                    m.signalPass()
+                else:
+                    playTurn(secondTurn)
+                    toggleTurn = True
 
             if(skipButton and skipRobot):
                 isGame = False
@@ -86,8 +92,10 @@ if __name__ == '__main__':
             else:
                 humanHand = v.getHumanHand() 
                 robotHand = v.getRobotHand()
+                gameStatus = v.getGameStatus() #?
 
                 winner = d.getWinner(humanHand, robotHand) #FER A DOMINO
+                winner = d.getWinner(gameStatus)
                 
     m.dance() #FER A MOVIMENT
 
@@ -109,12 +117,12 @@ def playTurn(player):
     playing = True
 
     #IDLE
+    m.idleposition()
     
     if(player == "h"):
         global skipButton
         while playing:
             
-            #wait for vision to say something
             newToken = v.getIfNewTokenOnBoard() #COMENATR PER FER
 
             humanHand = v.getHumanHand()
@@ -135,10 +143,10 @@ def playTurn(player):
             #Demanar diccionary estat
             dictionary = v.getBoardState() #COMENATR PER FER
             robotHand = v.getRobotHand()
-            well = v.getWellState()
+            well = v.getWellState() #COMENATR PER FER
 
             #Demanar accio
-            action, tokenH, tokenB = d.doAction(dictionary, robotHand, well) #FER A DOMINO, arreglar amb tipus de dades
+            action, cToken0, cToken1 = d.doAction(dictionary, robotHand, well) #FER A DOMINO, arreglar amb tipus de dades
 
             if(action == "t"):
                 #demanar coordenades d'origen i destí del Token en questió
@@ -167,12 +175,19 @@ def playTurn(player):
                 m.action("c", orientationNT) #Arreglar al moviment (bloqeuix fins que acaba)
 
                 m.moveTo(coordinatesnewTokenHand[0], coordinatesnewTokenHand[1])
-                m.action("d", orientationNTH)
+                m.action("d", orientationNTH) #ARREGLAT
 
                 #IDLE
+                m.idlePosition()
 
             elif(action == "p"):
                 skipRobot = True
+                m.signalPass() #FER a MOVIEMTN
                 
             time.sleep(1)
         
+
+
+
+
+def pygmageIdle
