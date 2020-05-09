@@ -44,8 +44,10 @@ if __name__ == '__main__':
             #Llegir mans
             humanHand = v.getHumanHand() #COMENATR PER FER
             robotHand = v.getRobotHand() #COMENATR PER FER
+            gameStatus = v.getGameStatus() #?
 
             firstTurn = d.getFirstTurn(humanHand, robotHand) #FER A DOMINO
+            firstTurn = d.getFirstTurn(gameStatus) #?
 
             if (firstTurn == "h"):
                 secondTrun = "r"
@@ -53,7 +55,7 @@ if __name__ == '__main__':
                 secondTrun = "h"
             
             #Robot senyala el que té el doble mès gran per començar
-            m.signalPlayer(firstTurn) #FER A MOVIMENT (ull a bloquejar-se fins acabar, posar en IDLE)
+            m.signalPlayer(firstTurn)
 
             #IDLE
             m.idlePosition()
@@ -90,8 +92,10 @@ if __name__ == '__main__':
             else:
                 humanHand = v.getHumanHand() 
                 robotHand = v.getRobotHand()
+                gameStatus = v.getGameStatus() #?
 
                 winner = d.getWinner(humanHand, robotHand) #FER A DOMINO
+                winner = d.getWinner(gameStatus)
                 
     m.dance() #FER A MOVIMENT
 
@@ -142,7 +146,7 @@ def playTurn(player):
             well = v.getWellState() #COMENATR PER FER
 
             #Demanar accio
-            action, tokenH, tokenB = d.doAction(dictionary, robotHand, well) #FER A DOMINO, arreglar amb tipus de dades
+            action, cToken0, cToken1 = d.doAction(dictionary, robotHand, well) #FER A DOMINO, arreglar amb tipus de dades
 
             if(action == "t"):
                 #demanar coordenades d'origen i destí del Token en questió
