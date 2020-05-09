@@ -58,25 +58,15 @@ def getFirstTurn(gameDictionary):
      
     maxDoubleRobot, maxSumRobot, indexMaxRobot, indexDoubleRobot = getDoublesAndMax(robotHand)
     maxDoubleHuman, maxSumHuman, indexMaxHuman, indexDoubleHuman = getDoublesAndMax(humanHand)
-
-    print("-----------------------------------------------------------------------")
-    print("maxDoubleRobot: ", maxDoubleRobot, " maxDoubleHuman: ", maxDoubleHuman)
-    print("maxSumRobot: ", maxSumRobot, " maxSumHuman: ", maxSumHuman)
-    print("-----------------------------------------------------------------------")
     
     if maxDoubleHuman < maxDoubleRobot:
-        print("Winner ROBOT with DOUBLE: [", maxDoubleRobot, ",", maxDoubleRobot, "]")
         return "r"
     elif maxDoubleHuman > maxDoubleRobot:
-        print("Winner HUMAN with DOUBLE: [", maxDoubleHuman, ",", maxDoubleHuman, "]")
         return "h"
     else:
-        print("NOBODY HAS DOUBLES!")
         if maxSumRobot > maxSumHuman:
-            print("Winner ROBOT with: [", maxFirstRobot, ",", maxSecondRobot, "] TOTAL:", maxSumRobot)
             return "r"
         elif maxSumRobot < maxSumHuman:
-            print("Winner HUMAN with: [", maxFirstHuman, ",", maxSecondHuman, "] TOTAL:", maxSumHuman)
             return "h" 
 
 def getWinner(gameDictionary, firstTurn):
@@ -103,15 +93,12 @@ def getWinner(gameDictionary, firstTurn):
         sumNumbers = first + second
         pointsHuman += sumNumbers
 
-    print("ROBOT:", pointsRobot, "  HUMAN:", pointsHuman)
     if pointsRobot < pointsHuman:
-        print("Winner ROBOT")
         return "r"
     elif pointsRobot > pointsHuman:
-        print("Winner HUMAN")
         return "h"
     elif pointsRobot == pointsHuman:
-        print("EMPAT, guanya qui té el torn")
+        # EMPAT, guanya qui té el torn
         return firstTurn
 
 def getEndings(board):
@@ -135,8 +122,6 @@ def getEndings(board):
                 if diffX <= 4 and diffX >=-4 and diffY <= 4 and diffY >=-4:
                     nearest.append(near)
         contiguous[key] = nearest
-        print(key, ": ",contiguous[key])
-
         ending1 = None
         ending2 = None
         contiguous1 = None
@@ -150,9 +135,14 @@ def getEndings(board):
                     ending2 = j
                     contiguous2 = contiguous[j][0]
 
-    print("ENDINGS: ", ending1, ", ", ending2)
-    print("CONT: ", contiguous1, ", ", contiguous2)
     return ending1, ending2, contiguous1, contiguous2
+
+def setNewPosition(token, x, y, o):
+    newToken = token.copy()
+    newToken[0] = (x,y,4,2)
+    newToken[2] = o
+    return newToken
+    
 
 # return action, cToken0, cToken1
 # action "t" -> tirar
@@ -170,8 +160,19 @@ def doAction(gameDictionary):
     ending1, ending2, contiguous1, contiguous2 = getEndings(board)
 
 
-    #if tokensInBoard == 0:
-        ## tirar el doble mes alt, o la fitxa mes alta
+    if tokensInBoard == 0:
+        md, ms, indexMaxRobot, indexDoubleRobot = getDoublesAndMax(robotHand)
+        if indexDoubleRobot != -1:
+            cToken0 = robotHand[indexDoubleRobot]
+        else:
+            cToken0 = robotHand[indexMaxRobot]
+
+        x = 30
+        y = 30
+        o = 1
+        cToken1 =setNewPosition(cToken0, x, y, o)
+        print("old:", cToken0, " new: ", cToken1)
+        
     
 
     #intenta tirar segons regles del domino
