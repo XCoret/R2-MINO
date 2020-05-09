@@ -15,12 +15,67 @@ print('Modul Joc Carregat!')
 def getFirstTurn(gameDictionary):
     humanHand = gameDictionary["maHuma"]
     robotHand = gameDictionary["maRobot"]
+    maxDoubleHuman = -1
+    maxDoubleRobot = -1
 
-    #Buscar per dobles
+    maxSumHuman = 0
+    maxSumRobot = 0
+    
+    maxFirstRobot = -1
+    maxSecondRobot = -1
+    
+    maxFirstHuman = -1
+    maxSecondHuman = -1
+     
+    for key in robotHand:
+        token = robotHand[key]
+        numbers = token[1]
+        first = numbers[0]
+        second = numbers[1]
+        sumNumbers = first + second
+        #Buscar fitxa mès alta
+        if sumNumbers > maxSumRobot:
+            maxSumRobot = sumNumbers
+            maxFirstRobot = first
+            maxSecondRobot = second
+        #Buscar per dobles
+        if(first == second and first > maxDoubleRobot):
+            maxDoubleRobot = first
 
-    #Buscar fitxa mès alta
+    for key in humanHand:
+        token = humanHand[key]
+        numbers = token[1]
+        first = numbers[0]
+        second = numbers[1]
+        sumNumbers = first + second
+        #Buscar fitxa mès alta
+        if sumNumbers > maxSumHuman:
+            maxSumHuman = sumNumbers
+            maxFirstHuman = first
+            maxSecondHuman = second
+        #Buscar per dobles
+        if(first == second and first > maxDoubleHuman):
+            maxDoubleHuman = first
 
-    return "h" o "r"
+    print("-----------------------------------------------------------------------")
+    print("maxDoubleRobot: ", maxDoubleRobot, " maxDoubleHuman: ", maxDoubleHuman)
+    print("maxSumRobot: ", maxSumRobot, " maxSumHuman: ", maxSumHuman)
+    print("-----------------------------------------------------------------------")
+    
+    if maxDoubleHuman < maxDoubleRobot:
+        print("Winner ROBOT with DOUBLE: [", maxDoubleRobot, ",", maxDoubleRobot, "]")
+        return "r"
+    elif maxDoubleHuman > maxDoubleRobot:
+        print("Winner HUMAN with DOUBLE: [", maxDoubleHuman, ",", maxDoubleHuman, "]")
+        return "h"
+    else:
+        print("NOBODY HAS DOUBLES!")
+        if maxSumRobot > maxSumHuman:
+            print("Winner ROBOT with: [", maxFirstRobot, ",", maxSecondRobot, "] TOTAL:", maxSumRobot)
+            return "r"
+        elif maxSumRobot < maxSumHuman:
+            print("Winner HUMAN with: [", maxFirstHuman, ",", maxSecondHuman, "] TOTAL:", maxSumHuman)
+            return "h" 
 
 def getWinner(gameDictionary):
     humanHand = gameDictionary["maHuma"]
@@ -28,7 +83,7 @@ def getWinner(gameDictionary):
 
     #Comptar les fitxes de cada mà
 
-    return "h" o "r"
+    #return "h" o "r"
 
 def doAction(gameDictionary):
     robotHand = gameDictionary["maRobot"]
@@ -39,4 +94,3 @@ def doAction(gameDictionary):
 
     #Si no es pot tirar return
 
-    
