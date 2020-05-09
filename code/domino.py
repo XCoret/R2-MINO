@@ -81,9 +81,36 @@ def getWinner(gameDictionary):
     humanHand = gameDictionary["maHuma"]
     robotHand = gameDictionary["maRobot"]
 
-    #Comptar les fitxes de cada mà
+    pointsHuman = 0
+    pointsRobot = 0
 
-    #return "h" o "r"
+    #Comptar les fitxes de cada mà
+    for key in robotHand:
+        token = robotHand[key]
+        numbers = token[1]
+        first = numbers[0]
+        second = numbers[1]
+        sumNumbers = first + second
+        pointsRobot += sumNumbers
+
+    for key in humanHand:
+        token = humanHand[key]
+        numbers = token[1]
+        first = numbers[0]
+        second = numbers[1]
+        sumNumbers = first + second
+        pointsHuman += sumNumbers
+
+    print("ROBOT:", pointsRobot, "  HUMAN:", pointsHuman)
+    if pointsRobot > pointsHuman:
+        print("Winner ROBOT")
+        return "r"
+    elif pointsRobot < pointsHuman:
+        print("Winner HUMAN")
+        return "h"
+    elif pointsRobot == pointsHuman:
+        print("EMPAT, guanya qui té el torn")
+        return "e"
 
 def doAction(gameDictionary):
     robotHand = gameDictionary["maRobot"]
