@@ -10,6 +10,8 @@ Classe fitxa:
     vb : valor extrem B
     orientacio : (0:horitzontal, 1:vertical)
 '''
+import random
+
 print('Modul Joc Carregat!')
 
 def getDoublesAndMax(hand):
@@ -160,6 +162,70 @@ def getPossibleTokensToPlay(numbers, hand):
             possibleTokens[i] = key
     return possibleTokens
 
+def getRandomTokenFromWell(well):
+    randomTokenIndex = random.randint(0,len(well))
+    return well[randomTokenIndex]
+
+def getEmptySpaceFromHand(robotHand):
+    if(len(robotHand) <= 11):
+        y = 6 + (2.5* (len(robotHand) - 1))
+        return [-22.5, y]
+    else:
+        y = 6 + (2.5* (len(robotHand) - 12))
+        return [-27, y]
+
+def getDoublesIndex(possibleTokens):
+    doubles = {}
+    iteration = 0
+    for check in possibleTokens:
+        if check[1][0] == check[1][1]:
+            doubles[iteration] = check[1][0]
+        iteration += 1
+    return sorted(doubles.items(), key=lambda x: x[1], reverse=True)
+
+def getrepeatedIndex(possibleTokens):
+    repeaters = []
+    iteration = 0
+    for check in possibleTokens:
+        iteration2 = 0
+        for compare in possibleTokens:
+            if iteration != iteration2:
+                if check[1][0] == compare[1][0] or check[1][0] == compare[1][1]:
+                    repeaters.append([iteration, check[1][0], (check[1][0] + check[1][1])])
+                elif check[1][1] == compare[1][0] or check[1][1] == compare[1][1]:
+                    repeaters.append([iteration, check[1][1],(check[1][0] + check[1][1])])
+            iteration2 += 1
+        iteration += 1
+    return sorted(repeaters, key = lambda x: int(x[2]), reverse=True)
+
+def getsortedByValueIndex(possibleTokens):
+    sortedByValue = {}
+    iteration = 0
+    for check in possibleTokens:
+        sortedByValue[iteration] = check[1][0] + check[1][1]
+        iteration += 1
+    
+    return sorted(sortedByValue.items(), key=lambda x: x[1], reverse=True)
+
+def getBestOption(possibleTokens):
+    # Dobles
+    doublesIndexes = getDoublesIndex(possibleTokens)
+    # Numeros Repetits
+    repeatedIndexes = getrepeatedIndex(possibleTokens)
+    # Mes grans
+    sortedByValue = getsortedByValueIndex(possibleTokens)
+
+    if len(doublesIndexes) > 0:
+        #Retorna el doble mès gran
+        return possibleTokens[list(doublesIndexes)[0:1][0][0]]
+    elif len(repeatedIndexes) > 0:
+        #Retorna el repetit mès gran
+        return possibleTokens[repeatedIndexes[0][0]]
+    else:
+        #Retorna el mès gran
+        return possibleTokens[sortedByValue[0][0]]
+        
+
 # return action, cToken0, cToken1
 # action "t" -> tirar
 # action "a" -> agafar
@@ -200,33 +266,33 @@ def doAction(gameDictionary):
                 # PASSAR
                 return "p", None, None
             else:
-                # firstToken = getRandomTokenFromWell(well)
-                # secondToken = getEmptySpaceFromHand(robotHand)
+                firstToken = getRandomTokenFromWell(well)
+                handPlaceCoordinates = getEmptySpaceFromHand(robotHand)
                 # AGAFAR
-                return "a", firstToken, secondToken
+                return "a", firstToken, handPlaceCoordinates
         else:
             # choose best token from possibleTokens
-            # firstToken, endingUsed = getBestOption(possibleTokens)
-            # secondToken = calculateNewPosition(firstToken, tokenBoard)
+            bestOption = getBestOption(possibleTokens)
+            # secondToken = calculateNewPosition(firstToken, tokenBoard) #Equip Visio
             # TIRAR
             return "t", firstToken, secondToken
         
     elif len(board) > 1:
         ending1, ending2, contiguous1, contiguous2 = getEndings(board)
-        # possibleNumbers = getPossibleNumbers(ending1, ending2, contiguous1, contiguous2)
-        # possibleTokens = getPossibleTokensToPlay(possibleNumbers, robotHand)
+        # possibleNumbers = getPossibleNumbers(ending1, ending2, contiguous1, contiguous2) #Marian
+        possibleTokens = getPossibleTokensToPlay(possibleNumbers, robotHand)
          if len(possibleTokens) == 0:
             if len(well) == 0:
                 # PASSAR
                 return "p", None, None
             else:
-                # firstToken = getRandomTokenFromWell(well)
-                # secondToken = getEmptySpaceFromHand(robotHand)
+                firstToken = getRandomTokenFromWell(well)
+                handPlaceCoordinates = getEmptySpaceFromHand(robotHand)
                 # AGAFAR
-                return "a", firstToken, secondToken
+                return "a", firstToken, handPlaceCoordinates
         else:
             # choose best token from possibleTokens
-            # firstToken, endingUsed = getBestOption(possibleTokens)
+            firstToken = getBestOption(possibleTokens)
             # secondToken = calculateNewPosition(firstToken, endingUsed)
             return "t", firstToken, secondToken
 
@@ -253,3 +319,5 @@ e1={
 }
 
 doAction(e1)
+
+#TO-DO: Col·locar la nova peça

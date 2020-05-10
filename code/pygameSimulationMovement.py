@@ -351,6 +351,13 @@ def dance():
     openTool()
     closeTool()
     openTool()
+
+def signalPass():
+    goIdle()
+    rotateTool('N')
+    rotateTool('S')
+    rotateTool('N')
+    rotateTool('S')
     
 ## TESTS ##
 def test1():
