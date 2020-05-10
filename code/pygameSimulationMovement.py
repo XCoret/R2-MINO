@@ -121,11 +121,19 @@ def calculateIdleDegreeTool():
 
 
 ## PRINT FUNCTIONS ##
+PURPLE = (83, 33, 158)
 
-def drawTable(): 
+def drawEllipse(x, y):
+    pygame.draw.ellipse(pWindow, PURPLE, [x, y-100, tableSide, 200])
+    
+
+def drawTable():
+    drawEllipse(baseX-round(tableSide/2), baseY-(tableSide + baseRadius))
     pygame.draw.rect(pWindow,greenTable,(baseX-round(tableSide/2),baseY-(tableSide + baseRadius), tableSide, tableSide))
     pygame.draw.rect(pWindow,orange,(baseX-round(tableSide/2)-laterals,baseY-(tableSide +baseRadius), laterals,tableSide))
     pygame.draw.rect(pWindow,orange,(baseX+round(tableSide/2),baseY-(tableSide +baseRadius), laterals,tableSide))
+    
+
 
 def printGrid():
     pWindow.fill(white)
@@ -343,6 +351,13 @@ def dance():
     openTool()
     closeTool()
     openTool()
+
+def signalPass():
+    goIdle()
+    rotateTool('N')
+    rotateTool('S')
+    rotateTool('N')
+    rotateTool('S')
     
 ## TESTS ##
 def test1():
@@ -407,9 +422,9 @@ while True:
 
             # Test 2: movement + idle
             if pEvent.key == K_LEFT:
-                #catch(0, 25, "N")
-                #drop(-25, 25, "S")
-                dance()
+                catch(0, 25, "N")
+                drop(-25, 25, "S")
+                #dance()
     pygame.display.update()
 
 ##    for pEvent in pygame.event.get():

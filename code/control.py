@@ -42,10 +42,9 @@ if __name__ == '__main__':
         
         if (isSetup):
             #Llegir mans
-            humanHand = v.getHumanHand() #COMENATR PER FER
-            robotHand = v.getRobotHand() #COMENATR PER FER
+            gameStatus = v.getGameStatus() #COMENATR PER FER
 
-            firstTurn = d.getFirstTurn(humanHand, robotHand) #FER A DOMINO
+            firstTurn = d.getFirstTurn(gameStatus) 
 
             if (firstTurn == "h"):
                 secondTrun = "r"
@@ -53,7 +52,7 @@ if __name__ == '__main__':
                 secondTrun = "h"
             
             #Robot senyala el que té el doble mès gran per començar
-            m.signalPlayer(firstTurn) #FER A MOVIMENT (ull a bloquejar-se fins acabar, posar en IDLE)
+            m.signalPlayer(firstTurn)
 
             #IDLE
             m.idlePosition()
@@ -69,9 +68,7 @@ if __name__ == '__main__':
                 playTurn(firstTurn)
                 toggleTurn = False
             elif:
-                if(skiprobot):
-                    m.signalPass()
-                else:
+                if(not skiprobot):
                     playTurn(secondTurn)
                     toggleTurn = True
 
@@ -88,10 +85,8 @@ if __name__ == '__main__':
                 isWon = False
                 isEnd = True
             else:
-                humanHand = v.getHumanHand() 
-                robotHand = v.getRobotHand()
-
-                winner = d.getWinner(humanHand, robotHand) #FER A DOMINO
+                gameStatus = v.getGameStatus() 
+                winner = d.getWinner(gameStatus, firstTurn)
                 
     m.dance() #FER A MOVIMENT
 
@@ -123,7 +118,7 @@ def playTurn(player):
 
             humanHand = v.getHumanHand()
 
-            if (humanHand.size() == 0): #Assegurar que es pot saber el tamany aixi
+            if (len(humanHand) == 0): #Assegurar que es pot saber el tamany aixi
                 playing = False
                 isGame = False
                 isWon = True
@@ -137,17 +132,12 @@ def playTurn(player):
         
         while playing:
             #Demanar diccionary estat
-            dictionary = v.getBoardState() #COMENATR PER FER
-            robotHand = v.getRobotHand()
-            well = v.getWellState() #COMENATR PER FER
+            gameStatus = v.getGameStatus()
 
             #Demanar accio
-            action, tokenH, tokenB = d.doAction(dictionary, robotHand, well) #FER A DOMINO, arreglar amb tipus de dades
+            action, cToken0, rTokenO, coordinatesD, rotationD = d.doAction(gameStatus) 
 
             if(action == "t"):
-                #demanar coordenades d'origen i destí del Token en questió
-                coordinatesH, orientationH = v.getTokenCoordinates(tokenH) #COMENATR PER FER
-                coordinatesB, orientationB = v.getTokenCoordinates(tokenB)
                 
                 m.moveTo(coordinatesH[0], coordinatesH[1]) #Arreglar al moviment (bloqeuix fins que acaba)
                 m.action("c", orientationH) #Arreglar al moviment (bloqeuix fins que acaba)
@@ -155,7 +145,7 @@ def playTurn(player):
                 m.moveTo(coordinatesB[0], coordinatesB[1])
                 m.action("d", orientationB)
 
-                if (robotHand.size() == 1): #Assegurar que es pot saber el tamany aixi
+                if (len(robotHand) == 1):
                     playing = False
                     isGame = False
                     isWon = True
@@ -164,26 +154,17 @@ def playTurn(player):
                 playing = False
                 
             elif(action == "a"):
-                coordinatesNewToken, orientationNT = v.getRandomWellToken() #COMENATR PER FER
-                coordinatesnewTokenHand, orientationNTH = v.getEmptyHandSpace() #COMENATR PER FER
 
-                m.moveTo(coordinatesNewToken[0], coordinatesNewToken[1]) #Arreglar al moviment (bloqeuix fins que acaba)
-                m.action("c", orientationNT) #Arreglar al moviment (bloqeuix fins que acaba)
+                m.moveTo(coordinatesNewToken[0], coordinatesNewToken[1]) #FER Quan simulació
+                m.action("c", orientationNT) 
 
                 m.moveTo(coordinatesnewTokenHand[0], coordinatesnewTokenHand[1])
-                m.action("d", orientationNTH) #ARREGLAT
 
                 #IDLE
                 m.idlePosition()
 
             elif(action == "p"):
                 skipRobot = True
-                m.signalPass() #FER a MOVIEMTN
+                m.signalPass()
                 
             time.sleep(1)
-        
-
-
-
-
-def pygmageIdle
