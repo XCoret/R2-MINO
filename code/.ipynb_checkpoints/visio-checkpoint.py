@@ -8,32 +8,65 @@ from matplotlib import pyplot as plt
 import time
 import math
 
-class Visio():
+class Visio():    
     def __init__(self):
+        self.originalBackground = None
         self.background = None        
         self.frame = None
         self.grayFrame = None
+        self.rotatedFrame = None
+        self.midaFrame = [0,0]
         
-        self.patroFitxa = None
-        self.midaFixa = (0,0) #width,height
+        self.patroH = None
+        self.patroV = None
+        self.midaFitxa = [0,0] # p.e.: Fitxa Vertical [amplada, alcada]
         self.rotacioDefecte = 0.0
         
-        self.estatPartida = {}
+        self.empty = True
+        
+        self.estatPartida = None
         
     ###################################################################
+    def rotate_frame(self):
+        print("rotant frame...")
+        (h,w) = self.grayFrame.shape[:2]
+        (cX,cY) = (w//2,h//2)
+        
+        M = cv.getRotationMatrix2D((cX,cY),self.rotacioDefecte,1.0)
+        cos = np.abs(M[0,0])
+        sin = np.abs(M[0,1])
+        
+        nW = int((h*sin)+(w*cos))
+        nH = int((h*cos)+(w*sin))
+        
+        M[0,2] += (nW/2)-cX
+        M[1,2] += (nH/2)-cY
+        
+        return cv.warpAffine(self.grayFrame,M,(nW,nH))
     
+    ###################################################################
     def updateFrame(self,frame):
         self.frame = frame
         self.grayFrame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-               
+        self.midaFrame[0]=frame.shape[0]
+        self.midaFrame[1]=frame.shape[1]
         self.backgroundSubstraction()
+        if self.empty:
+            self.getFirstFeatures()
+        if self.rotacioDefecte == 0.0:
+            self.rotatedFrame = self.grayFrame
+        else:
+            self.rotatedFrame = self.rotate_frame()
+        
     
     ##### backgroundSubstraction #####
     def backgroundSubstraction(self, debug=False):
-        if self.background is None:
+        if self.originalBackground is None:
+            self.originalBackground = self.grayFrame
             self.background = self.grayFrame
         else:
-            self.background = cv.absdiff(self.background,self.grayFrame)
+            self.background = cv.absdiff(self.grayFrame,self.originalBackground)
+            
         if debug:
             cv.imshow("Debug visio: backgroundSubstraction",self.background)
     
@@ -132,6 +165,7 @@ class Visio():
     
     
     def getFirstFeatures(self, debug = False):
+        
         im = self.frame.copy()
         _, threshold = cv.threshold(self.frame,127,255,cv.THRESH_BINARY)
         threshold = cv.GaussianBlur(threshold,(5,5),0)
@@ -143,7 +177,6 @@ class Visio():
         posicio = (0,0)
         rotacio = 0.0
         midaFitxa = (0,0) #w,h
-        fitxaTrobada=False
         for i,c in enumerate(contours):  
             if hierarchy[0][i,3]==-1:
                 # Calculem els vertex maxim i minim i la rotacio del contorn            
@@ -153,22 +186,15 @@ class Visio():
                 posicio = rect[0]
                 # Definim la mida de la fitxa
                 midaFitxa = rect[1]
+                self.midaFitxa = midaFitxa
                 # Definim la rotacio alpha de la fitxa
                 rotacio = rect[2]
-                fitxaTrobada = True
+                self.empty = False
                 break
-                '''
-                #
-                #
-                #
-                M = cv.getRotationMatrix2D((im.shape[1]/2,im.shape[0]/2),rotacioAlpha,1)
-                dst = cv.warpAffine(im,M,(im.shape[1],im.shape[0]))
-                #
-                #
-                #
-                '''
-        self.patroFitxa = np.zeros((20,10),dtype=np.uint8)
-        if fitxaTrobada:
+                
+        if not self.empty:
+            #self.estatPartida={'maRobot':{},'maHuma':{},'taulell':{},'pou':{}}
+            self.patroH = None
             # Trobar una plantilla del centre de una fitxa per trobar les demes
             rows,cols,_ = im.shape
 
@@ -184,32 +210,108 @@ class Visio():
 
             h_gap = centerX - x
             v_gap = centerY - y
-
+            dst = self.grayFrame.copy()
             # Traslacio al centre
             M = np.float32([[1,0,h_gap],[0,1,v_gap]])
-            dst = cv.warpAffine(im,M,(cols,rows))
-
+            dst = cv.warpAffine(dst,M,(cols,rows))
+            
             # Rotacio
-            if width > height:
+            if width > height: # Horitzontal
                 rotacioOrigen = 90+rotacio
-            else:
-                rotacioOrigen=rotacio
+            else: # Vertical
+                rotacioOrigen= rotacio
                 temp = width
                 width = height
                 height = temp
-
+            self.midaFitxa = [min(width, height),max(width, height)]
+            self.rotacioDefecte = rotacioOrigen
             M = cv.getRotationMatrix2D((cols/2,rows/2),rotacioOrigen,1)
             dst = cv.warpAffine(dst,M,(cols,rows))
 
             # ROI
             templateHeight = height*0.2
             templateWidth = width*0.5
-            self.patroFitxa  = dst[ centerY-int(templateHeight*0.5):centerY+int(templateHeight*0.5) , centerX-int(templateWidth*0.5) : centerX+int(templateWidth*0.5)]
-
+            self.patroH  = dst[ centerY-int(templateHeight*0.5):centerY+int(templateHeight*0.5) , centerX-int(templateWidth*0.5) : centerX+int(templateWidth*0.5)]
+            self.patroV = self.patroH.transpose()
             if debug :
                 plt.figure()
-                plt.imshow(self.patroFitxa)
+                plt.imshow(self.patroH)
                 print('Amplada: {}, Alcada: {}, Rotacio: {}'.format(midaFitxa[0],midaFitxa[1],rotacio))
-                print('Temps execució: %.3f segons' %(time.time()-start))
+                
+        return (posicio,self.midaFitxa,self.rotacioDefecte),self.patroH  
+    
+    
+    
+    def contarPunts(self,roi):
+        dst = np.zeros((roi.shape[0],roi.shape[1],3),dtype=np.uint8)
+        dst[:,:,0] = roi[:,:]
+        dst[:,:,1] = roi[:,:]
+        dst[:,:,2] = roi[:,:]
+        dst = cv.GaussianBlur(dst,(5,5),0)
+        _,threshold = cv.threshold(dst,127,255,cv.THRESH_BINARY)    
+        contours, hierarchy = cv.findContours(threshold[:,:,0],cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+        punts = 0
 
-        return (posicio,midaFitxa,rotacio),self.patroFitxa  
+        dst = cv.drawContours(dst,contours,-1,(255,127,0),1)
+        #plt.figure()
+        #plt.imshow(dst,'gray')
+        for i,c in enumerate(contours):
+            pare = hierarchy[0][i,3]
+            if pare != -1:
+                punts+=1
+        return punts
+    
+    def getTableData(self):
+        print('empty or not: {}'.format(self.empty))
+        if not self.empty:
+            if self.patroH is None:
+                self.getFirstFeatures()
+                        
+            # Template matching
+            arrayPatrons = [self.patroV,self.patroH]
+            zonaMatch = int(min(self.patroV.shape))
+            self.estatPartida={'maRobot':{},'maHuma':{},'taulell':{},'pou':{}}
+            # TODO: ROI per cada zona d'interes
+            found=[]
+            for patro in arrayPatrons:
+                w,h = patro.shape[::-1]
+                # Template Matching
+                res = cv.matchTemplate(self.rotatedFrame,patro,cv.TM_CCOEFF_NORMED)
+                thr = 0.8
+                loc = np.where(res>=thr)
+
+                for pt in zip(*loc[::-1]):
+                    # Trobar coordenades sense rotar
+
+                    if len(found)==0:
+                        same=False
+                    else:
+                        same=False
+                        for f in found:
+                            if pt[0] in (np.arange(f[0]-zonaMatch, f[0]+zonaMatch)):
+                                if pt[1] in (np.arange(f[1]-zonaMatch, f[1]+zonaMatch)):
+                                    same=True
+                                    break
+                    if not same:
+                        found.append(pt)
+                        top_left = pt
+                        bottom_right = (pt[0] + w, pt[1] + h)                
+                        top_right = (bottom_right[0],top_left[1])
+                        bottom_left = (top_left[0],bottom_right[1])
+
+                        center = (int(top_left[0]+(round((top_right[0]-top_left[0])/2))) ,int(top_left[1]+(round((bottom_left[1]-top_left[1])/2))))
+
+
+                        orientacio = 1 #h
+                        alcada = self.midaFitxa[1]
+                        amplada = self.midaFitxa[0]
+                        if top_right[0]-top_left[0] < bottom_left[1]-top_left[1]:
+                            orientacio=0
+                            alcada = self.midaFitxa[0]
+                            amplada = self.midaFitxa[1]
+
+
+                        self.estatPartida['taulell'][len(self.estatPartida['taulell'])] = [(center[0],center[1],amplada,alcada),[0,0],orientacio]               
+        else:
+            self.estatPartida = None
+        return self.estatPartida
