@@ -15,7 +15,6 @@ class Visio():
         self.frame = None
         self.grayFrame = None
         self.rotatedFrame = None
-        self.midaFrame = [0,0]
         
         self.patroH = None
         self.patroV = None
@@ -28,7 +27,6 @@ class Visio():
         
     ###################################################################
     def rotate_frame(self):
-        print("rotant frame...")
         (h,w) = self.grayFrame.shape[:2]
         (cX,cY) = (w//2,h//2)
         
@@ -43,13 +41,23 @@ class Visio():
         M[1,2] += (nH/2)-cY
         
         return cv.warpAffine(self.grayFrame,M,(nW,nH))
-    
+    ###################################################################
+    def rotate_point(self,pt):
+        angle = (self.rotacioDefecte*math.pi)/180
+        ox = self.rotatedFrame.shape[1]/2
+        oy = self.rotatedFrame.shape[0]/2
+        px, py = pt
+        x = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+        y = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)   
+        x = int(x-((self.rotatedFrame.shape[1]-self.grayFrame.shape[1])/2))
+        y = int(y-((self.rotatedFrame.shape[0]-self.grayFrame.shape[0])/2))
+        
+        return (x,y)
     ###################################################################
     def updateFrame(self,frame):
         self.frame = frame
         self.grayFrame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-        self.midaFrame[0]=frame.shape[0]
-        self.midaFrame[1]=frame.shape[1]
+
         self.backgroundSubstraction()
         if self.empty:
             self.getFirstFeatures()
@@ -262,7 +270,6 @@ class Visio():
         return punts
     
     def getTableData(self):
-        print('empty or not: {}'.format(self.empty))
         if not self.empty:
             if self.patroH is None:
                 self.getFirstFeatures()
@@ -309,9 +316,32 @@ class Visio():
                             orientacio=0
                             alcada = self.midaFitxa[0]
                             amplada = self.midaFitxa[1]
+                        self.estatPartida['taulell'][len(self.estatPartida['taulell'])] = [(center[0],center[1],amplada,alcada),[0,0],orientacio] 
+                        
+            for dic in self.estatPartida['taulell']:
+                #print(estatPartida['taulell'][dic])
+                x,y,w,h = self.estatPartida['taulell'][dic][0]
+                puntsA=0
+                puntsB=0
+                if self.estatPartida['taulell'][dic][2]: # Vertical
+                    # ROI
+                    roi = self.rotatedFrame[y-round(h/2) : y,x-round(w/2) : x+round(w/2)] # Superior
+                    puntsA=self.contarPunts(roi)
+                    roi = self.rotatedFrame[y : y+round(h/2),x-round(w/2) : x+round(w/2)] # Inferior
+                    puntsB=self.contarPunts(roi)
 
+                else: # Horitzontal
+                    # ROI
+                    roi = self.rotatedFrame[y-round(h/2) : y+round(h/2),x-round(w/2) : x] # Esquerra
+                    puntsA=self.contarPunts(roi)
 
-                        self.estatPartida['taulell'][len(self.estatPartida['taulell'])] = [(center[0],center[1],amplada,alcada),[0,0],orientacio]               
+                    roi = self.rotatedFrame[y-round(h/2) : y+round(h/2),x : x+round(w/2)] # Dreta
+                    puntsB=self.contarPunts(roi)
+
+                self.estatPartida['taulell'][dic][1]=[puntsA,puntsB]
+                rotatedCenter = self.rotate_point((self.estatPartida['taulell'][dic][0][0],self.estatPartida['taulell'][dic][0][1]))
+                self.estatPartida['taulell'][dic][0]=(rotatedCenter[0],rotatedCenter[1],self.estatPartida['taulell'][dic][0][2],self.estatPartida['taulell'][dic][0][3])
+                
         else:
             self.estatPartida = None
         return self.estatPartida
