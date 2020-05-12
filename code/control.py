@@ -40,6 +40,7 @@ if __name__ == '__main__':
         #IDLE
         m.idlePosition()
         
+        ## TODO treure del bucle i posar-ho abans del while
         if (isSetup):
             #Llegir mans
             gameStatus = v.getGameStatus() #COMENATR PER FER
