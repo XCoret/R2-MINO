@@ -50,9 +50,15 @@ class Visio():
         x = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
         y = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)   
         x = int(x-((self.rotatedFrame.shape[1]-self.grayFrame.shape[1])/2))
-        y = int(y-((self.rotatedFrame.shape[0]-self.grayFrame.shape[0])/2))
-        
+        y = int(y-((self.rotatedFrame.shape[0]-self.grayFrame.shape[0])/2))    
         return (x,y)
+    ###################################################################
+    def robot_coords(self,pt):
+        max_x=60
+        max_y=65
+        x = (pt[0]*max_x)/self.grayFrame.shape[1]
+        y = (pt[1]*max_y)/self.grayFrame.shape[0]
+        return(x,y)
     ###################################################################
     def updateFrame(self,frame):
         self.frame = frame
@@ -340,7 +346,8 @@ class Visio():
 
                 self.estatPartida['taulell'][dic][1]=[puntsA,puntsB]
                 rotatedCenter = self.rotate_point((self.estatPartida['taulell'][dic][0][0],self.estatPartida['taulell'][dic][0][1]))
-                self.estatPartida['taulell'][dic][0]=(rotatedCenter[0],rotatedCenter[1],self.estatPartida['taulell'][dic][0][2],self.estatPartida['taulell'][dic][0][3])
+                robotCenter = self.robot_coords(rotatedCenter)
+                self.estatPartida['taulell'][dic][0]=(robotCenter[0],robotCenter[1],self.estatPartida['taulell'][dic][0][2],self.estatPartida['taulell'][dic][0][3])
                 
         else:
             self.estatPartida = None
