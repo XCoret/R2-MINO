@@ -24,7 +24,10 @@ class Visio():
         self.empty = True
         
         self.estatPartida = None
-        
+    ###################################################################
+    
+    def showFrame(self):
+        return self.frame
     ###################################################################
     def rotate_frame(self):
         (h,w) = self.grayFrame.shape[:2]
@@ -54,10 +57,15 @@ class Visio():
         return (x,y)
     ###################################################################
     def robot_coords(self,pt):
+        # TODO 
+        # midaTaulell 
         max_x=60
         max_y=65
-        x = (pt[0]*max_x)/self.grayFrame.shape[1]
-        y = (pt[1]*max_y)/self.grayFrame.shape[0]
+        pt0 = pt[0]-self.grayFrame.shape[1]/2
+        pt1 = (pt[1]-self.grayFrame.shape[0])
+        
+        x = ((pt0*max_x)/self.grayFrame.shape[1])
+        y = -((pt1*max_y)/self.grayFrame.shape[0])
         return(x,y)
     ###################################################################
     def updateFrame(self,frame):
@@ -77,7 +85,7 @@ class Visio():
     def backgroundSubstraction(self, debug=False):
         if self.originalBackground is None:
             self.originalBackground = self.grayFrame
-            self.background = self.grayFrame
+            self.background = cv.absdiff(self.grayFrame,self.originalBackground)
         else:
             self.background = cv.absdiff(self.grayFrame,self.originalBackground)
             
