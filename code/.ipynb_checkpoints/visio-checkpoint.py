@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-'''
-Computa els canvis registrats en el taulell de joc i ho passa al Mòdul Control.
-'''
 import numpy as np
 import math
 import cv2 as cv
@@ -11,6 +7,13 @@ class ModulVisio():
     ###############################################################################################
     def __init__(self, debug = False):
         self.debug = debug
+        
+        # mides en cm del taulell #
+        self.midaTaulell =[60.0,65.0]
+        self.midaMin = 10.0
+        self.midaMax = 40.0      
+        self.margeRobot = 5.0
+        ###########################
         
         self.empty = True
         self.originalBackground = None
@@ -27,7 +30,7 @@ class ModulVisio():
         
         self.estatPartida = None
     ###############################################################################################
-        
+    
     def updateFrame(self,frame,debug=None):
         if debug is not None:
             self.debug = debug
@@ -204,15 +207,30 @@ class ModulVisio():
         return punts
     
     ###############################################################################################
+    def getZone(self,pt):
+        #self.estatPartida = {'maRobot':{},'maHuma':{},'taulell':{},'pou':{}}
+        zona = None
+        x = round(((pt[0]*self.midaTaulell[0])/self.grayFrame.shape[1]))
+        y = round(((pt[0]*self.midaTaulell[1])/self.grayFrame.shape[0]))
+
+        if x in np.arange(0,self.midaMin) and y in np.arange(self.midaMin,self.midaTaulell[0]):            
+            zona = 'maHuma'
+        elif x in np.arange(self.midaTaulell[0]-self.midaMin,self.midaTaulell[0]) and y in np.arange(self.midaMin,self.midaTaulell[0]):            
+            zona = 'maRobot'
+        elif x in np.arange(self.midaMin,self.midaTaulell[0]-self.midaMin) and y in np.arange(0,self.midaMin):            
+            zona = 'pou'            
+        elif x in np.arange(self.midaMin,self.midaMin+self.midaMax) and y in np.arange(self.midaMin,self.midaMin+self.midaMax):            
+            zona = 'taulell'              
+        return zona    
+    ###############################################################################################
     
     def getTableData(self):
         arrayPatrons = [self.patroH, self.patroV]
         zonaMatch = int(min(self.patroV.shape))
         self.estatPartida = {'maRobot':{},'maHuma':{},'taulell':{},'pou':{}}
-        
+        diccionariPunts={}
         found = []
         for patro in arrayPatrons:
-            final = self.rotatedFrame.copy()
             w,h = patro.shape[::-1]
             # Template Matching
             res = cv.matchTemplate(self.rotatedFrame,patro,cv.TM_CCOEFF_NORMED)
@@ -247,14 +265,16 @@ class ModulVisio():
                         orientacio=0
                         alcada = self.midaFitxa[0]
                         amplada = self.midaFitxa[1]
-                    self.estatPartida['taulell'][len(self.estatPartida['taulell'])] = [(center[0],center[1],amplada,alcada),[0,0],orientacio] 
+                    diccionariPunts[len(diccionariPunts)]=[(center[0],center[1],amplada,alcada),[0,0],orientacio] 
+                    #self.estatPartida['taulell'][len(self.estatPartida['taulell'])] = [(center[0],center[1],amplada,alcada),[0,0],orientacio] 
                     
-        for dic in self.estatPartida['taulell']:
+        for dic in diccionariPunts:
             #print(estatPartida['taulell'][dic])
-            x,y,w,h = self.estatPartida['taulell'][dic][0]
+            x,y,w,h = diccionariPunts[dic][0]
             puntsA=0
             puntsB=0
-            if self.estatPartida['taulell'][dic][2]: # Vertical
+            orientacio = diccionariPunts[dic][2]
+            if diccionariPunts[dic][2]: # Vertical
                 # ROI
                 roi = self.rotatedFrame[y-round(h/2) : y,x-round(w/2) : x+round(w/2)] # Superior
                 puntsA=self.contarPunts(roi)
@@ -269,15 +289,21 @@ class ModulVisio():
                 roi = self.rotatedFrame[y-round(h/2) : y+round(h/2),x : x+round(w/2)] # Dreta
                 puntsB=self.contarPunts(roi)
 
-            self.estatPartida['taulell'][dic][1]=[puntsA,puntsB]
-            rotatedCenter = self.rotate_point((self.estatPartida['taulell'][dic][0][0],self.estatPartida['taulell'][dic][0][1]))
-            robotCenter = self.robot_coords(rotatedCenter)
+                
+                
+            diccionariPunts[dic][1]=[puntsA,puntsB]
+            rotatedCenter = self.rotate_point((diccionariPunts[dic][0][0],diccionariPunts[dic][0][1]))
+            x,y = self.robot_coords(rotatedCenter)
             # id: [[x,y,w,h],[puntsA,puntsB],orientacio]
-            self.estatPartida['taulell'][dic][0]=(robotCenter[0],robotCenter[1],self.estatPartida['taulell'][dic][0][2],self.estatPartida['taulell'][dic][0][3])        
+            zona = self.getZone(rotatedCenter)
+            self.estatPartida[zona][len(self.estatPartida[zona])]=[(x,y,w,h),[puntsA,puntsB],orientacio]
+            
+            
+            
         if self.debug:
             print('[Visio: getTableData()]')
-            for d in self.estatPartida['taulell']:
-                print('{}: {}'.format(d,self.estatPartida['taulell'][d]))
+            for d in self.estatPartida:
+                print('{}: {}'.format(d,self.estatPartida[d]))
             
     ###############################################################################################                    
     def rotate_point(self,pt):
@@ -294,8 +320,8 @@ class ModulVisio():
     def robot_coords(self,pt):
         # TODO 
         # midaTaulell 
-        max_x=60
-        max_y=65
+        max_x=self.midaTaulell[0]
+        max_y=self.midaTaulell[1]
         pt0 = pt[0]-self.grayFrame.shape[1]/2
         pt1 = (pt[1]-self.grayFrame.shape[0])
         
@@ -304,5 +330,5 @@ class ModulVisio():
         return(x,y)
     
     ###############################################################################################
-    
+        
 
