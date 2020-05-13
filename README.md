@@ -1,6 +1,6 @@
 # R2-MINO
 
-![alt text](https://raw.githubusercontent.com/XCoret/R2-MINO/master/docs/icona.png)
+![alt text](https://raw.githubusercontent.com/XCoret/R2-MINO/master/docs/robot.png)
 
 
 Adaptació d’un robot Scara per a jugar partides
