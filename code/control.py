@@ -89,7 +89,7 @@ if __name__ == '__main__':
                 gameStatus = v.getGameStatus() 
                 winner = d.getWinner(gameStatus, firstTurn)
                 
-    m.dance() #FER A MOVIMENT
+    m.dance() 
 
 #Mètode que crida visió per iniciar el setup
 def setSetup(changeSetup):
@@ -117,6 +117,8 @@ def playTurn(player):
             
             newToken = v.getIfNewTokenOnBoard() #COMENATR PER FER
 
+            #CDETECTAR POU BUIT PER PASSAR
+
             humanHand = v.getHumanHand()
 
             if (len(humanHand) == 0): #Assegurar que es pot saber el tamany aixi
@@ -130,6 +132,9 @@ def playTurn(player):
             time.sleep(1)
     elif(player == "r"):
         global skipRobot
+
+        #IDLE
+        m.idlePosition()
         
         while playing:
             #Demanar diccionary estat

@@ -293,8 +293,8 @@ def doAction(gameDictionary):
         else:
             # choose best token from possibleTokens
             firstToken = getBestOption(possibleTokens)
-            # secondToken = calculateNewPosition(firstToken, endingUsed)
-            return "t", firstToken, secondToken
+            # boardCoordinates = calculateNewPosition(firstToken, endingUsed)
+            return "t", firstToken, boardCoordinates
 
 
 ## TESTS ##
