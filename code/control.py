@@ -12,17 +12,15 @@ Les seves tasques seran:
 -Proporcionar al mòdul Moviment les coordenades inicials i finals de la posició de la fitxa a moure.
 '''
 import domino as d
-import visio as v
+# import visio as v #COMENTAT PER TEST
 import moviment as m
 import time
 
 if __name__ == '__main__':
     print('Modul Control Excecutant')
-    #d.func()
-    #v.llegirImatge('src/domino.jpg')
-    #print(m.getMovementTo(4,4,4))
+
+    #Control variables
     isGame = False
-    isSetup = True
     isEnd = False
     isWon = False
     firstTurn = None
@@ -32,69 +30,77 @@ if __name__ == '__main__':
     skipButton = False
     skipRobot = False
     winner = None
-    m = m()
 
-    while (!isEnd):
-        #7 peçes repartides a cada jugador (MANUAL)
-        #14 peçes restants, al pou (girades) (MANUAL)
-        #IDLE
-        m.idlePosition()
-        
-        ## TODO treure del bucle i posar-ho abans del while
-        if (isSetup):
-            #Llegir mans
-            gameStatus = v.getGameStatus() #COMENATR PER FER
+    gameStatusTEST ={
+    'maRobot':{ 
+            #idFitxa : [ (x,y,amplada,alçada), [ puntsEsquerra/Dalt, puntsDreta/Baix], orientació]
+            0 :[(5,5,4,2),[6,6],0],
+            1 :[(5,10,4, 2),[1,2],0],
+            2 :[(5,15,4, 2),[3,4],0]
+    },
+    'maHuma':{ 
+        0 :[(55,40,4,2),[3,0],0],
+        1 :[(55,45,4, 2),[5,5],0],
+        2 :[(5,15,4, 2),[4,1],0]
+    },
+    'taulell':{},
+    'pou':{}
+    } 
+    
+    #m = m() #COMENTAT PER TEST
+    #v = v() #COMENTAT PER TEST
 
-            firstTurn = d.getFirstTurn(gameStatus) 
+    #7 peçes repartides a cada jugador (MANUAL)
+    #14 peçes restants, al pou (girades) (MANUAL)
+    
+    #IDLE
+    #m.idlePosition() #COMENTAT PER TEST
 
-            if (firstTurn == "h"):
-                secondTrun = "r"
-            elif (firstTurn == "r"):
-                secondTrun = "h"
+    #Read hands for game setup
+    #gameStatus = v.getGameStatus() #AFEGIR QUAN VISIÓ 100% IMPLEMENTADA #COMENTAT PER TEST
+
+    firstTurn = d.getFirstTurn(gameStatusTEST) 
+
+    if (firstTurn == "h"):
+        secondTrun = "r"
+    elif (firstTurn == "r"):
+        secondTrun = "h"
+
+    print(firstTurn)
+    #Signal who starts
+    #m.signalPlayer(firstTurn) #COMENTAT PER TEST
+
+    #IDLE
+    #m.idlePosition() #COMENTAT PER TEST
             
-            #Robot senyala el que té el doble mès gran per començar
-            m.signalPlayer(firstTurn)
+    #time.sleep(5) #COMENTAT PER TEST
+    
+    #isGame = True #COMENTAT PER TEST
 
-            #IDLE
-            m.idlePosition()
-            
-            time.sleep(5)
-            
-            isSetup = False
-            isGame = True
-
+    while(not isEnd):
         while(isGame):
             
             if(toggleTurn and not skipButton):
                 playTurn(firstTurn)
                 toggleTurn = False
-            elif:
-                if(not skiprobot):
-                    playTurn(secondTurn)
-                    toggleTurn = True
+            elif (not skiprobot):
+                playTurn(secondTurn)
+                toggleTurn = True
 
             if(skipButton and skipRobot):
                 isGame = False
-                isWon = True
+                isWon = True          
                 
-                
-        if(isWon):
-            global winner
+        while(isWon):
             if winner != None:
                 m.signalPlayer(winner)
-                #Play music
                 isWon = False
                 isEnd = True
             else:
                 gameStatus = v.getGameStatus() 
                 winner = d.getWinner(gameStatus, firstTurn)
                 
-    m.dance() 
-
-#Mètode que crida visió per iniciar el setup
-def setSetup(changeSetup):
-    global isSetup
-    isSetup = changeStart
+    #m.dance() #COMENTAT PER TEST
 
 def setSkipButton(changeskipButton):
     global skipButton

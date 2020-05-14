@@ -279,9 +279,10 @@ def doAction(gameDictionary):
         
     elif len(board) > 1:
         ending1, ending2, contiguous1, contiguous2 = getEndings(board)
-        # possibleNumbers = getPossibleNumbers(ending1, ending2, contiguous1, contiguous2) #Marian
+        #possibleNumbers = getPossibleNumbers(ending1, ending2, contiguous1, contiguous2) #Marian
+        possibleNumbers = [] #AUXILIAR
         possibleTokens = getPossibleTokensToPlay(possibleNumbers, robotHand)
-         if len(possibleTokens) == 0:
+        if len(possibleTokens) == 0:
             if len(well) == 0:
                 # PASSAR
                 return "p", None, None
