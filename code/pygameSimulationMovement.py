@@ -268,7 +268,7 @@ def upTool():
 
     while True:
         printRutine()
-        if(actualHeight > operateToolLift(True)):
+        if(actualHeight > m.operateToolLift(True)):
             actualHeight -=0.05
         else:
             pygame.display.update()
@@ -280,7 +280,7 @@ def downTool():
 
     while True:
         printRutine()
-        if(actualHeight < operateToolLift(False)):
+        if(actualHeight < m.operateToolLift(False)):
             actualHeight +=0.05
         else:
             pygame.display.update()
