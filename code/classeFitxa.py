@@ -1,3 +1,5 @@
+import pygame,sys
+
 class Fitxa(pygame.sprite.Sprite):
     def __init__(self,src,x,y,scale):
         pygame.sprite.Sprite.__init__(self)
@@ -5,6 +7,7 @@ class Fitxa(pygame.sprite.Sprite):
         self.src = 'src/fitxes/fitxa_{}.png'.format(src)
         self.scale = scale
         self.original_frame = pygame.image.load(self.src)
+        self.back_frame = pygame.image.load('src/fitxes/back.png')
         self.image = self.original_frame.copy().convert_alpha()
         #self.image.fill((255,127,0))
         self.image = pygame.transform.scale(self.image,self.scale)
@@ -18,7 +21,7 @@ class Fitxa(pygame.sprite.Sprite):
         self.placed=False
         self.angle = 0.0
         self.perpendicular = False
-        self.rotate(45)
+        self.directRotate(90)
         
     def __str__(self):
         ret = str("{} :: {} ::{}".format(self.rect.center,self.drag,self.placed))
@@ -42,15 +45,33 @@ class Fitxa(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.image,self.angle)
         self.rect = self.image.get_rect()
         self.rect.center = old_center
+
+    def directRotate(self, angle):
+        self.angle = angle
+        old_center = self.rect.center
+        self.image = self.original_frame.copy().convert_alpha()
+        
+        self.image = pygame.transform.scale(self.image,self.scale)
+        self.image = pygame.transform.rotate(self.image,self.angle)
+        self.rect = self.image.get_rect()
+        self.rect.center = old_center
+
+    def setBack(self, isBack):
+        if isBack:
+            self.image = self.back_frame.copy().convert_alpha()
+        else:
+            self.image = self.original_frame.copy().convert_alpha()
+
+        self.image = pygame.transform.scale(self.image,self.scale)
         
         
 # En el pygame heu de crear fora del bucle del joc un grup de fitxes
-fitxes = pygame.sprite.Group()
+#fitxes = pygame.sprite.Group()
 # i despres crear-ne una i afegir-la
 #src=id que correspon el numero de imatge de la fitxa a la carpeta (src/fitxes/)
 # x,y = posicio en pixels
 #scale = escala de la fitxa (en vertical)->(amplada,alcada)
-fitxes.add( Fitxa(src,x,y,scale) 
+#fitxes.add( Fitxa(src,x,y,scale) 
 # recordeu actualitzar el grup i pintar les fitxes a cada iteracio del bucle
-fitxes.update()
-fitxes.draw(pWindow)
+#fitxes.update()
+#fitxes.draw(pWindow)

@@ -19,9 +19,6 @@ class C:
 
     pos = 0
 
-    def __init__(self):
-        print ("Constructor")
-
     def distance(self, x_pos, y_pos):
         return math.sqrt(x_pos*x_pos + y_pos*y_pos)
 

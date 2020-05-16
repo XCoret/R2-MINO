@@ -166,12 +166,12 @@ def getRandomTokenFromWell(well):
     randomTokenIndex = random.randint(0,len(well))
     return well[randomTokenIndex]
 
-def getEmptySpaceFromHand(robotHand):
+def getEmptySpaceFromHand(robotHand): #ARREGLAR
     if(len(robotHand) <= 11):
-        y = 6 + (2.5* (len(robotHand) - 1))
+        y = 6.5 + (2.5* (len(robotHand) - 1))
         return [-22.5, y]
     else:
-        y = 6 + (2.5* (len(robotHand) - 12))
+        y = 6.5 + (2.5* (len(robotHand) - 12))
         return [-27, y]
 
 def getDoublesIndex(possibleTokens):
