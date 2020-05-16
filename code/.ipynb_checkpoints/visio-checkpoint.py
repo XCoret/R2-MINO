@@ -209,7 +209,7 @@ class ModulVisio():
     ###############################################################################################
     def getZone(self,pt):
         #self.estatPartida = {'maRobot':{},'maHuma':{},'taulell':{},'pou':{}}
-        zona = None
+        zona = 'taulell'
         x = round(((pt[0]*self.midaTaulell[0])/self.grayFrame.shape[1]))
         y = round(((pt[0]*self.midaTaulell[1])/self.grayFrame.shape[0]))
 
