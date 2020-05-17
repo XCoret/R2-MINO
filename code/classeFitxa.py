@@ -35,6 +35,9 @@ class Fitxa(pygame.sprite.Sprite):
             return False
     def moveTo(self,x,y):
         self.rect.center = (x,y)
+
+    def getPosition(self):
+        return self.rect.center
         
     def rotate(self, angle):
         self.angle = (self.angle+angle)%360

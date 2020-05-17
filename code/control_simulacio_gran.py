@@ -38,31 +38,31 @@ blue = (0,0,255)
 orange = (255,153,0)
 
 ## WINDOW ##
-heightW = 800
+heightW = 900 # Abans 800
 widthW = 1600
 widthColumn = 600
 heightRow = round(heightW/2)
 
 ## TABLE ##
-tableSide = 400 ## mm
-laterals = 100 ##mm
+tableSide = 600 ## mm HARDCODED A 1.5
+laterals = 150 ##mm HARDCODED A 1.5
 
 ## BASE
 baseX= 1100
-baseY= 600
-baseRadius = 50 ## mm
+baseY= 800 # Abans 600
+baseRadius = 75 ## mm HARDCODED A 1.5
 
 ## Arm A
-lenghtA = 275 ## mm
-widthA = 25 ## mm
+lenghtA = 550 ## mm HARDCODED A 1.5
+widthA = 50 ## mm HARDCODED A 1.5
 AposX = baseX + lenghtA
 AposY = 400
 degreeA = 180
 maxDegreeA = 360
 
 ## Arm B
-lenghtB = 275 ## mm
-widthB = 25 ## mm
+lenghtB = 550 ## mm HARDCODED A 1.5
+widthB = 50 ## mm HARDCODED A 1.5
 BposX = AposX + lenghtB
 BposY = 400
 degreeB = 90
@@ -146,24 +146,7 @@ def coordinates2Pixels(cX, cY, scale):
     x = baseX + cX*10*scale # cm to mm
     y = baseY - cY*10*scale # cm to mm
     return x, y
-
-def getTokenByCoordinates(cX, cY):
-    cXP, cYP = coordinates2Pixels(cX, cY, 1)
-    global fitxes
-    closestToken = None
-    closestDist = 5000
     
-    for i in fitxes.sprites():
-        tX, tY = i.getPosition()
-        
-        dist = math.sqrt((tX - cXP)**2 + (tY - cYP)**2)
-
-        if dist < closestDist:
-            closestDist = dist
-            closestToken = i
-
-    return closestToken
-        
 
 ## PRINT FUNCTIONS ##
 PURPLE = (83, 33, 158)
@@ -235,13 +218,11 @@ def printRutine():
     
  
 ## MOVEMENT FUNCTIONS ##
-def goTo(goX, goY, isDegree, token):
+def goTo(goX, goY, isDegree):
     global next_degreeA
     global next_degreeB
     global degreeA
     global degreeB
-    global BposX
-    global BposY
 
     armAReady = False
     armBReady = False
@@ -255,26 +236,23 @@ def goTo(goX, goY, isDegree, token):
         printRutine()
 
         ## Gradual increment of degreeA
-        if round(degreeA,1) != round(next_degreeA,1):
+        if round(degreeA,2) != next_degreeA:
             if(degreeA < next_degreeA):
-                degreeA +=0.10
+                degreeA +=0.01
 
             else:
-                degreeA -=0.10
+                degreeA -=0.01
         else:
             armAReady = True
 
         ## Gradual increment of degreeB
-        if round(degreeB,1) != round(next_degreeB,1):
+        if round(degreeB,2) != next_degreeB:
             if(degreeB < next_degreeB):
-                degreeB +=0.1
+                degreeB +=0.01
             else:
-                degreeB -=0.1
+                degreeB -=0.01
         else:
             armBReady = True
-
-        if token != None:
-            token.moveTo(BposX, BposY)
         
         pygame.display.update()
 
@@ -308,7 +286,7 @@ def upTool():
     while True:
         printRutine()
         if(actualHeight > m.operateToolLift(True)):
-            actualHeight -=0.1
+            actualHeight -=0.05
         else:
             pygame.display.update()
             break
@@ -320,7 +298,7 @@ def downTool():
     while True:
         printRutine()
         if(actualHeight < m.operateToolLift(False)):
-            actualHeight +=0.1
+            actualHeight +=0.05
         else:
             pygame.display.update()
             break
@@ -334,9 +312,9 @@ def rotateTool(orientation):
         printRutine()
         if round(degreeTool,2) != round(next_degreeTool,2):
             if(degreeTool < next_degreeTool):
-                degreeTool +=0.1
+                degreeTool +=0.05
             else:
-                degreeTool -=0.1
+                degreeTool -=0.05
         else:
             pygame.display.update()
             break   
@@ -344,49 +322,48 @@ def rotateTool(orientation):
         
 def goIdle():
     x, y = m.idlePosition()
-    goTo(x, y, True, None)
+    goTo(x, y, True)
 
 def goSignalPlayer(player):
     x, y = m.signalPlayer(player)
-    goTo(x, y, True, None)
+    goTo(x, y, True)
     closeTool()
     openTool()
     closeTool()
     openTool()    
     
 def goCatch(pX, pY, orientation):
-    goTo(pX, pY, False, None)
+    goTo(pX, pY, False)
     rotateTool(orientation)
     downTool()
     closeTool()
     upTool()
 
-def goDrop(pX, pY, orientation, token):
-    goTo(pX, pY, False, token)
+def goDrop(pX, pY, orientation):
+    goTo(pX, pY, False)
     rotateTool(orientation)
     downTool()
     openTool()
-    token.directRotate(m.operateToolRotate(orientation))
     upTool()
 
 def goDance():
-    goTo(0, 20, False, None)
-    goTo(5, 25, False, None)
-    goTo(0, 30, False, None)
+    goTo(0, 20, False)
+    goTo(5, 25, False)
+    goTo(0, 30, False)
     closeTool()
     openTool()
-    goTo(-5, 25, False, None)
-    goTo(0, 20, False, None)
+    goTo(-5, 25, False)
+    goTo(0, 20, False)
     closeTool()
     openTool()
     closeTool()
     openTool()
-    goTo(-5, 25, False, None)
-    goTo(0, 30, False, None)
+    goTo(-5, 25, False)
+    goTo(0, 30, False)
     closeTool()
     openTool()
-    goTo(5, 25, False, None)
-    goTo(0, 20, False, None)
+    goTo(5, 25, False)
+    goTo(0, 20, False)
     closeTool()
     openTool()
     closeTool()
@@ -456,100 +433,6 @@ printRutine()
 pygame.display.update()
 ## ----- PYGAME ----- ##
 
-## ----- TESTS LOGIC ----- ##
-
-def humanTest():
-    print("Human Test...")
-    gameStatusStartTest ={}
-    gameStatusTest ={}
-
-    player = "h"
-
-    for i in range(4):
-        isGame = True
-        isWon = False
-        skipButton = False
-        winner = None
-        playing = True
-
-        #Test ha tirat
-        if i == 0:
-            gameStatusStartTest ={
-            'maRobot':{},
-            'maHuma':{0 :[(55,40,4,2),[6,6],0], 1 :[(55,45,4, 2),[5,5],0], 2 :[(5,15,4, 2),[4,1],0]},
-            'taulell':{0 :[(5,5,4,2),[3,0],0]},
-            'pou':{}
-            }
-            gameStatusTest ={
-            'maRobot':{},
-            'maHuma':{0 :[(55,40,4,2),[6,6],0], 1 :[(5,15,4, 2),[4,1],0]},
-            'taulell':{0 :[(5,5,4,2),[3,0],0], 1 :[(55,45,4, 2),[5,5],0]},
-            'pou':{}
-            }
-        #Test ha tirat i guanyat
-        elif i == 1:
-            gameStatusStartTest ={
-            'maRobot':{},
-            'maHuma':{0 :[(55,40,4,2),[6,6],0]},
-            'taulell':{0 :[(5,5,4,2),[3,0],0], 1 :[(55,45,4, 2),[5,5],0]},
-            'pou':{}
-            }
-            gameStatusTest ={
-            'maRobot':{},
-            'maHuma':{},
-            'taulell':{0 :[(5,5,4,2),[3,0],0], 1 :[(55,45,4, 2),[5,5],0], 2 :[(55,40,4,2),[6,6],0]},
-            'pou':{}
-            }
-        #Test ha passat
-        elif i == 2:
-            gameStatusStartTest ={
-            'maRobot':{},
-            'maHuma':{0 :[(55,40,4,2),[6,6],0], 1 :[(55,45,4, 2),[5,5],0], 2 :[(5,15,4, 2),[4,1],0]},
-            'taulell':{0 :[(5,5,4,2),[3,0],0]},
-            'pou':{}
-            }
-            gameStatusTest ={
-            'maRobot':{},
-            'maHuma':{0 :[(55,40,4,2),[6,6],0], 1 :[(5,15,4, 2),[4,1],0]},
-            'taulell':{0 :[(5,5,4,2),[3,0],0]},
-            'pou':{}
-            }
-        #Test intent jugar quan ja ha passat
-        elif i == 3:
-            skipButton = True
-            
-            
-
-            
-        if(player == "h" and not skipButton):
-            gameStatusStart = gameStatusStartTest
-            while playing:
-                gameStatus = gameStatusTest
-                
-                #Ha tirat
-                if len(gameStatus["taulell"]) > len(gameStatusStart["taulell"]):
-                    #Ha guanyat
-                    if (len(gameStatus["maHuma"]) == 0):
-                        playing = False
-                        isGame = False
-                        isWon = True
-                        winner = "h"
-                    else:
-                        playing = False
-
-                elif len(gameStatus["pou"]) == 0:
-                    #Ha passat
-                    skipButton = True
-                    playing = False
-                    
-                time.sleep(1)
-                
-            print("PLAYING: ", playing, " / ISGAME: ", isGame, " / ISWON: ", isWon, " / SKIPBUTTON: ", skipButton, " / WINNER: ", winner) ##PRINT DE TEST
-        else:
-            print ("No li toca a ell")
-
-## ----- TESTS LOGIC ----- ##
-
 ## ----- CONTROL LOGIC ----- ##
 
 if __name__ == '__main__':
@@ -570,12 +453,12 @@ if __name__ == '__main__':
     gameStatusTEST ={
     'maRobot':{ 
             #idFitxa : [ (x,y,amplada,alçada), [ puntsEsquerra/Dalt, puntsDreta/Baix], orientació]
-            0 :[(5,5,4,2),[3,0],0],
+            0 :[(5,5,4,2),[6,6],0],
             1 :[(5,10,4, 2),[1,2],0],
             2 :[(5,15,4, 2),[3,4],0]
     },
     'maHuma':{ 
-        0 :[(55,40,4,2),[6,6],0],
+        0 :[(55,40,4,2),[3,0],0],
         1 :[(55,45,4, 2),[5,5],0],
         2 :[(5,15,4, 2),[4,1],0]
     },
@@ -587,57 +470,42 @@ if __name__ == '__main__':
     #14 peçes restants, al pou (girades) (MANUAL)
     
     simCreateGame()
-
-    humanTest()
-
-    ## TEST MOVIMENT DE FITXA ##
-
-##    time.sleep(1)
-##
-##    goCatch(20, 47.5, "N")
-##
-##    token = getTokenByCoordinates(20, 47.5)
-##
-##    goDrop(0, 25, "W", token)
-##
-##    token.setBack(False)
-
-    ## TEST MOVIMENT DE FITXA ##
     
     #IDLE
-    ##goIdle()
+    goIdle()
 
     #Read hands for game setup
     #gameStatus = v.getGameStatus() #AFEGIR QUAN VISIÓ 100% IMPLEMENTADA #COMENTAT PER TEST
 
-    ##firstTurn = d.getFirstTurn(gameStatusTEST) 
+    firstTurn = d.getFirstTurn(gameStatusTEST) 
 
-##    if (firstTurn == "h"):
-##        secondTrun = "r"
-##    elif (firstTurn == "r"):
-##        secondTrun = "h"
+    if (firstTurn == "h"):
+        secondTrun = "r"
+    elif (firstTurn == "r"):
+        secondTrun = "h"
 
-    ##print(firstTurn)
+    print(firstTurn)
+    time.sleep(5)
+
     
-    ##time.sleep(5)
-
+    
     #Signal who starts
-    ##goSignalPlayer(firstTurn)
+    goSignalPlayer(firstTurn)
 
     #IDLE
-    ##goIdle()
+    goIdle()
     
-    ##time.sleep(5)
+    time.sleep(5)
     
-    ##isGame = True 
+    #isGame = True #COMENTAT PER TEST
 
     while(not isEnd):
         while(isGame):
             
-            if(toggleTurn):
+            if(toggleTurn and not skipButton):
                 playTurn(firstTurn)
                 toggleTurn = False
-            else:
+            elif (not skiprobot):
                 playTurn(secondTurn)
                 toggleTurn = True
 
@@ -656,43 +524,45 @@ if __name__ == '__main__':
                 
     #m.dance() #COMENTAT PER TEST
 
+def setSkipButton(changeskipButton):
+    global skipButton
+    skipButton = changeskipButton
+
+#Mètode d'I/O del botó de passar torn
 
 def playTurn(player):
     global isGame
     global isWon
     global winner
-    global skipButton
-    global skipRobot
     playing = True
 
     #IDLE
-    goIdle()
-    #gameStatusStart = v.getGameStatus() ##COMENTAT PER TEST
+    m.idleposition()
     
-    if(player == "h" and not skipButton):
-        
+    if(player == "h"):
+        global skipButton
         while playing:
-            #gameStatus = v.getGameStatus() ##COMENTAT PER TEST
             
-            #Ha tirat
-            if len(gameStatus["taulell"]) > len(gameStatusStart["taulell"]):
-                #Ha guanyat
-                if (len(gameStatus["maHuma"]) == 0):
-                    playing = False
-                    isGame = False
-                    isWon = True
-                    winner = "h"
-                else:
-                    playing = False
+            newToken = v.getIfNewTokenOnBoard() #COMENATR PER FER
 
-            elif len(gameStatus["pou"]) == 0:
-                #Ha passat
-                skipButton = True
+            #CDETECTAR POU BUIT PER PASSAR
+
+            humanHand = v.getHumanHand()
+
+            if (len(humanHand) == 0): #Assegurar que es pot saber el tamany aixi
+                playing = False
+                isGame = False
+                isWon = True
+                winner = "h"
+            elif (newToken or skipButton):
                 playing = False
                 
             time.sleep(1)
-            
-    elif(player == "r" and not skipRobot):
+    elif(player == "r"):
+        global skipRobot
+
+        #IDLE
+        m.idlePosition()
         
         while playing:
             #Demanar diccionary estat
