@@ -29,6 +29,8 @@ class ModulVisio():
         self.rotacioDefecte = 0.0
         
         self.estatPartida = None
+        
+        self.extrems=[]
     ###############################################################################################
     
     def updateFrame(self,frame,debug=None):
@@ -66,9 +68,36 @@ class ModulVisio():
             ax[2,1].set_title('rotatedFrame')
             ax[2,2].remove()
             plt.show()     
+            
     ###############################################################################################
     def contarPou(self):
+        fitxaFrame = cv.absdiff(self.grayFrame,self.originalBackground)
+        midaMin = int((self.midaMin*self.frame.shape[1])/self.midaTaulell[0])
+        midaMax = int((self.midaMax*self.frame.shape[0])/self.midaTaulell[1])
         
+        pou = fitxaFrame[0:midaMin,midaMin:midaMin+midaMax]
+        threshold = cv.GaussianBlur(pou,(5,5),0)
+        contours,hierarchy = cv.findContours(threshold,cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)   
+        zona='pou'
+        orientacio = 0
+        for i,c in enumerate(contours):
+            if hierarchy[0][i,3]==-1:
+                rect = cv.minAreaRect(contours[i])
+                
+                x,y = self.robot_coords(rect[0])
+                w = (rect[1][1]*self.frame.shape[1])/self.midaTaulell[0]
+                h = (rect[1][0]*self.frame.shape[1])/self.midaTaulell[0]
+                
+                
+                if w>h:
+                    orientacio = 0
+                else:
+                    orientacio = 1
+                
+                self.estatPartida[zona][len(self.estatPartida[zona])]=[(x,y,w,h),[0,0],orientacio]
+                
+      
+                    
     ###############################################################################################
     
     def getFirstFeatures(self):
@@ -283,6 +312,10 @@ class ModulVisio():
             puntsA=0
             puntsB=0
             orientacio = diccionariPunts[dic][2]
+            if w>h:
+                oritentacio = 0
+            else:
+                oritentacio = 1
             if diccionariPunts[dic][2]: # Vertical
                 # ROI
                 roi = self.rotatedFrame[y-round(h/2) : y,x-round(w/2) : x+round(w/2)] # Superior
@@ -305,10 +338,12 @@ class ModulVisio():
             x,y = self.robot_coords(rotatedCenter)
             # id: [[x,y,w,h],[puntsA,puntsB],orientacio]
             zona = self.getZone(rotatedCenter)
+            w = (w*self.frame.shape[1])/self.midaTaulell[0]
+            h = (h*self.frame.shape[1])/self.midaTaulell[0]
             self.estatPartida[zona][len(self.estatPartida[zona])]=[(x,y,w,h),[puntsA,puntsB],orientacio]
             
             
-            
+        self.contarPou()
         if self.debug:
             print('[Visio: getTableData()]')
             for d in self.estatPartida:
