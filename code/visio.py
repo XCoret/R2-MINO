@@ -9,7 +9,7 @@ class ModulVisio():
         self.debug = debug
         
         # mides en cm del taulell #
-        self.midaTaulell =[60.0,65.0]
+        self.midaTaulell =[60.0,55.0]
         self.midaMin = 10.0
         self.midaMax = 40.0      
         self.margeRobot = 5.0
@@ -66,6 +66,9 @@ class ModulVisio():
             ax[2,1].set_title('rotatedFrame')
             ax[2,2].remove()
             plt.show()     
+    ###############################################################################################
+    def contarPou(self):
+        
     ###############################################################################################
     
     def getFirstFeatures(self):
@@ -210,17 +213,23 @@ class ModulVisio():
     def getZone(self,pt):
         #self.estatPartida = {'maRobot':{},'maHuma':{},'taulell':{},'pou':{}}
         zona = 'taulell'
-        x = round(((pt[0]*self.midaTaulell[0])/self.grayFrame.shape[1]))
-        y = round(((pt[0]*self.midaTaulell[1])/self.grayFrame.shape[0]))
+        
+        midaMin = (self.midaMin*self.frame.shape[1])/self.midaTaulell[0]
+        midaMax = (self.midaMax*self.frame.shape[0])/self.midaTaulell[1]
 
-        if x in np.arange(0,self.midaMin) and y in np.arange(self.midaMin,self.midaTaulell[0]):            
+        x,y = pt
+    
+        if x in np.arange(0,midaMin) and y in np.arange(midaMin,midaMin+midaMax):    
             zona = 'maHuma'
-        elif x in np.arange(self.midaTaulell[0]-self.midaMin,self.midaTaulell[0]) and y in np.arange(self.midaMin,self.midaTaulell[0]):            
+            
+        elif x in np.arange(self.frame.shape[1]-midaMin, self.frame.shape[1]) and y in np.arange(midaMin,self.frame.shape[1]):            
             zona = 'maRobot'
-        elif x in np.arange(self.midaMin,self.midaTaulell[0]-self.midaMin) and y in np.arange(0,self.midaMin):            
-            zona = 'pou'            
-        elif x in np.arange(self.midaMin,self.midaMin+self.midaMax) and y in np.arange(self.midaMin,self.midaMin+self.midaMax):            
-            zona = 'taulell'              
+#         elif x in np.arange(midaMin,self.frame.shape[1]-midaMin) and y in np.arange(0,midaMin):            
+#             zona = 'pou'      
+            
+        elif x in np.arange(midaMin,midaMin+midaMax) and y in np.arange(midaMin,midaMin+midaMax):            
+            zona = 'taulell'     
+            
         return zona    
     ###############################################################################################
     
