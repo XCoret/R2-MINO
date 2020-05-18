@@ -29,10 +29,17 @@ class ModulVisio():
         self.rotacioDefecte = 0.0
         
         self.estatPartida = None
+        self.tempEstatPartida = None
+        
         
         self.extrems=[]
+        self.fitxesEnTaulell = 0
+        self.eix_X=[None,None] #[minim, maxim]
+        self.eix_Y=[None,None]
     ###############################################################################################
-    
+    def getGameStatus(self):
+        return self.estatPartida
+    ###############################################################################################
     def updateFrame(self,frame,debug=None):
         if debug is not None:
             self.debug = debug
@@ -85,14 +92,16 @@ class ModulVisio():
                 rect = cv.minAreaRect(contours[i])
                 
                 x,y = self.robot_coords(rect[0])
-                w = (rect[1][1]*self.frame.shape[1])/self.midaTaulell[0]
-                h = (rect[1][0]*self.frame.shape[1])/self.midaTaulell[0]
                 
+                alcadaPixels = int((self.midaTaulell[1]*self.frame.shape[0])/self.midaTaulell[1]-5)
+            
+                w = round((rect[1][1]*self.midaTaulell[0])/self.frame.shape[1],2)
+                h = round((rect[1][0]*self.midaTaulell[1])/(alcadaPixels),2)
                 
                 if w>h:
-                    orientacio = 0
-                else:
                     orientacio = 1
+                else:
+                    orientacio = 0
                 
                 self.estatPartida[zona][len(self.estatPartida[zona])]=[(x,y,w,h),[0,0],orientacio]
                 
@@ -101,19 +110,21 @@ class ModulVisio():
     ###############################################################################################
     
     def getFirstFeatures(self):
+        
+        midaMin = int((self.midaMin*self.frame.shape[1])/self.midaTaulell[0])    
+        
         threshold = cv.GaussianBlur(self.fitxaFrame,(5,5),0)
         contours,hierarchy = cv.findContours(threshold,cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)   
         
         max_w = 0
         max_h = 0
-        
+
         for i,c in enumerate(contours):
             if hierarchy[0][i,3]==-1:
                 rect = cv.minAreaRect(contours[i])
-                if(rect[1][0]>=max_w and rect[1][1]>=max_h):
+                if rect[0][1]>=midaMin and (rect[1][0]>=max_w and rect[1][1]>=max_h):     
                     max_w = rect[1][0]
                     max_h = rect[1][1]
-                    
                     posicio = rect[0]
                     midaFitxa = rect[1]
                     rotacio = rect[2]
@@ -152,10 +163,10 @@ class ModulVisio():
             self.rotatedFrame = dst
             
             # Definicio patron    
-            templateHeight = height * 0.2
+            templateHeight = height * 0.25
             templateWidth = width * 0.5
             
-            self.patroH = dst[centerY-int(templateHeight*0.5):centerY+int(templateHeight*0.5), centerX-int(templateWidth*0.5):centerX+int(templateWidth*0.5)]
+            self.patroH = dst[centerY-int(templateHeight*0.4):centerY+int(templateHeight*0.5), centerX-int(templateWidth*0.5):centerX+int(templateWidth*0.5)]
             self.patroV = self.patroH.transpose()
             self.midaFitxa = [min(width, height),max(width, height)]
             self.rotacioDefecte = rotacio                
@@ -233,7 +244,7 @@ class ModulVisio():
             ax[1][1].set_title('Contorns ROI')            
             ax[1][2].imshow(threshold,'gray')
             ax[1][2].set_title('Contorns') 
-                       
+
             plt.show()
         
         return punts
@@ -265,7 +276,7 @@ class ModulVisio():
     def getTableData(self):
         arrayPatrons = [self.patroH, self.patroV]
         zonaMatch = int(min(self.patroV.shape))
-        self.estatPartida = {'maRobot':{},'maHuma':{},'taulell':{},'pou':{}}
+        self.estatPartida = {'maRobot':{},'maHuma':{},'taulell':{},'pou':{},'extrems':[]}
         diccionariPunts={}
         found = []
         for patro in arrayPatrons:
@@ -303,9 +314,11 @@ class ModulVisio():
                         orientacio=0
                         alcada = self.midaFitxa[0]
                         amplada = self.midaFitxa[1]
-                    diccionariPunts[len(diccionariPunts)]=[(center[0],center[1],amplada,alcada),[0,0],orientacio] 
-                    #self.estatPartida['taulell'][len(self.estatPartida['taulell'])] = [(center[0],center[1],amplada,alcada),[0,0],orientacio] 
                     
+                    diccionariPunts[len(diccionariPunts)]=[(center[0],center[1],amplada,alcada),[0,0],orientacio] 
+                    
+
+        
         for dic in diccionariPunts:
             #print(estatPartida['taulell'][dic])
             x,y,w,h = diccionariPunts[dic][0]
@@ -313,9 +326,9 @@ class ModulVisio():
             puntsB=0
             orientacio = diccionariPunts[dic][2]
             if w>h:
-                oritentacio = 0
-            else:
                 oritentacio = 1
+            else:
+                oritentacio = 0
             if diccionariPunts[dic][2]: # Vertical
                 # ROI
                 roi = self.rotatedFrame[y-round(h/2) : y,x-round(w/2) : x+round(w/2)] # Superior
@@ -330,19 +343,47 @@ class ModulVisio():
 
                 roi = self.rotatedFrame[y-round(h/2) : y+round(h/2),x : x+round(w/2)] # Dreta
                 puntsB=self.contarPunts(roi)
-
                 
                 
             diccionariPunts[dic][1]=[puntsA,puntsB]
             rotatedCenter = self.rotate_point((diccionariPunts[dic][0][0],diccionariPunts[dic][0][1]))
             x,y = self.robot_coords(rotatedCenter)
             # id: [[x,y,w,h],[puntsA,puntsB],orientacio]
+            
             zona = self.getZone(rotatedCenter)
-            w = (w*self.frame.shape[1])/self.midaTaulell[0]
-            h = (h*self.frame.shape[1])/self.midaTaulell[0]
+            
+            alcadaPixels = int((self.midaTaulell[1]*self.frame.shape[0])/self.midaTaulell[1]-5)
+            
+            w = round((w*self.midaTaulell[0])/self.frame.shape[1],2)
+            h = round((h*self.midaTaulell[1])/(alcadaPixels),2)
+            
             self.estatPartida[zona][len(self.estatPartida[zona])]=[(x,y,w,h),[puntsA,puntsB],orientacio]
-            
-            
+                     
+            if zona=='taulell':
+                if len(self.extrems)<=1:
+                    self.extrems.append([(x,y,w,h),[puntsA,puntsB],orientacio])                    
+                else:
+                    trobada = False
+                    for f in self.tempEstatPartida[zona]:
+                        fitxa = self.tempEstatPartida[zona][f]                        
+                        if puntsA == fitxa[1][0] and puntsB == fitxa[1][1]:
+                            trobada = True
+                            break
+                            
+                    if not trobada:
+                        f1 = self.extrems[0]
+                        f2 = self.extrems[1]
+                        dist1 = math.sqrt( (f1[0][0]-x)**2 + (f1[0][1]-y)**2 )
+                        dist2 = math.sqrt( (f2[0][0]-x)**2 + (f2[0][1]-y)**2 )
+                    
+                        if(dist1<dist2):
+                            self.extrems[0]=[(x,y,w,h),[puntsA,puntsB],orientacio]
+                        elif(dist1>dist2):
+                            self.extrems[1]=[(x,y,w,h),[puntsA,puntsB],orientacio]                
+                    
+        
+        self.tempEstatPartida = self.estatPartida.copy()  
+        self.estatPartida['extrems']=self.extrems
         self.contarPou()
         if self.debug:
             print('[Visio: getTableData()]')
