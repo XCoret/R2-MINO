@@ -271,14 +271,14 @@ def getClosestToken(board, extrem):
 
 def getDirectionBlocked(proxima, extrem):
     blockedList = []
-        if (extrem[0][0] > proxima[0][0]):
-            blockedList.append("W")
-        else:
-            blockedList.append("E")
-        if (extrem[0][1] > proxima[0][1]):
-            blockedList.append("S")
-        else:
-            blockedList.append("N")
+    if (extrem[0][0] > proxima[0][0]):
+        blockedList.append("W")
+    else:
+        blockedList.append("E")
+    if (extrem[0][1] > proxima[0][1]):
+        blockedList.append("S")
+    else:
+        blockedList.append("N")
     return blockedList
 
 def getDistancesFromBoard(cXR, cYR, isExtremDouble, isExtremVertical):
@@ -314,17 +314,17 @@ def placeToken(board, extrem, extremValue, token):
     proxima = getClosestToken(board, extrem)
     
     # Saber tipus de extrem, i token    
-    if (extrem[2] == 1:
+    if (extrem[2] == 1):
         isExtremVertical = True
     else:
         isExtremVertical = False
         
-    if (extrem[1][0] == extrem[1][1]:
+    if (extrem[1][0] == extrem[1][1]):
         isExtremDouble = True
     else:
         isExtremDouble = False
 
-    if (token[1][0] == token[1][1]:
+    if (token[1][0] == token[1][1]):
         isTokenDouble = True
     else:
         isTokenDouble = False
@@ -361,8 +361,8 @@ def placeToken(board, extrem, extremValue, token):
     distDict = getDistancesFromBoard(cXR, cYR, isExtremDouble, isExtremVertical)
 
     # Restar les ja descartades del diccionari de longituds
-     for i in dirBlocked:
-	distDict.pop(i, None)
+    for i in dirBlocked:
+        distDict.pop(i, None)
 
     # Si extrem Normal - nou token Doble
     if (not isExtremDouble and isTokenDouble):
@@ -385,7 +385,7 @@ def placeToken(board, extrem, extremValue, token):
 
     # Si extrem Doble - nou token Normal
     elif (isExtremDouble and not isTokenDouble):
-        direccio = next(iter(distDict)
+        direccio = next(iter(distDict))
         if isExtremVertical:
             if (direccio == "N"):
                 cXA = cXR
@@ -417,7 +417,7 @@ def placeToken(board, extrem, extremValue, token):
 
     # Si extrem Normal - nou token Normal
     elif (not isExtremDouble and not isTokenDouble):
-        direccio = next(iter(distDict)
+        direccio = next(iter(distDict))
 
         if (direccio == "N"):
             cXA = cXR
@@ -492,26 +492,26 @@ def doAction(gameDictionary):
 
 
 ## TESTS ##
-e1={
-    'maRobot':{ 
-            #idFitxa : [ (x,y,amplada,alçada), [ puntsEsquerra/Dalt, puntsDreta/Baix], orientació]
-            0 :[(5,5,4,2),[1,1],0],
-            1 :[(5,10,4, 2),[4,4],0],
-            2 :[(5,15,4, 2),[4,2],0],
-            3 :[(5,20,4, 2),[2,3],0]  
-    },
-    'maHuma':{ 
-        0 :[(55,40,4,2),[1,2],0],
-        1 :[(55,45,4, 2),[5,0],0] 
-    },
-    'taulell':{ 
-        0 :[(26,24,4,2),[4,3],1],
-        1 :[(23,25,4, 2),[6,3],0],
-        2 :[(20,25,4, 2),[6,6],1]    
-    },
-    'pou':{}
-}
-
-doAction(e1)
+##e1={
+##    'maRobot':{ 
+##            #idFitxa : [ (x,y,amplada,alçada), [ puntsEsquerra/Dalt, puntsDreta/Baix], orientació]
+##            0 :[(5,5,4,2),[1,1],0],
+##            1 :[(5,10,4, 2),[4,4],0],
+##            2 :[(5,15,4, 2),[4,2],0],
+##            3 :[(5,20,4, 2),[2,3],0]  
+##    },
+##    'maHuma':{ 
+##        0 :[(55,40,4,2),[1,2],0],
+##        1 :[(55,45,4, 2),[5,0],0] 
+##    },
+##    'taulell':{ 
+##        0 :[(26,24,4,2),[4,3],1],
+##        1 :[(23,25,4, 2),[6,3],0],
+##        2 :[(20,25,4, 2),[6,6],1]    
+##    },
+##    'pou':{}
+##}
+##
+##doAction(e1)
 
 #TO-DO: Col·locar la nova peça
