@@ -522,6 +522,7 @@ def eventMoveTokenFunction():
                 print("MOVING")
                 print()
                 tokenMoving.moveTo(mx,my)
+                tokenMoving.setBack(False)
                 printRutine()
                 fitxes.update()
                 fitxes.draw(pWindow)

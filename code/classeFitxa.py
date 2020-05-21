@@ -66,6 +66,7 @@ class Fitxa(pygame.sprite.Sprite):
             self.image = self.original_frame.copy().convert_alpha()
 
         self.image = pygame.transform.scale(self.image,self.scale)
+        self.image = pygame.transform.rotate(self.image,self.angle)
         
         
 # En el pygame heu de crear fora del bucle del joc un grup de fitxes
