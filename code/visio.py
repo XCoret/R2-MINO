@@ -326,15 +326,15 @@ class ModulVisio():
             puntsB=0
             orientacio = diccionariPunts[dic][2]
             if w>h:
-                oritentacio = 1
+                orientacio = 1
             else:
-                oritentacio = 0
+                orientacio = 0
             if diccionariPunts[dic][2]: # Vertical
                 # ROI
                 roi = self.rotatedFrame[y-round(h/2) : y,x-round(w/2) : x+round(w/2)] # Superior
-                puntsA=self.contarPunts(roi)
-                roi = self.rotatedFrame[y : y+round(h/2),x-round(w/2) : x+round(w/2)] # Inferior
                 puntsB=self.contarPunts(roi)
+                roi = self.rotatedFrame[y : y+round(h/2),x-round(w/2) : x+round(w/2)] # Inferior
+                puntsA=self.contarPunts(roi)
 
             else: # Horitzontal
                 # ROI
@@ -360,8 +360,54 @@ class ModulVisio():
             self.estatPartida[zona][len(self.estatPartida[zona])]=[(x,y,w,h),[puntsA,puntsB],orientacio]
                      
             if zona=='taulell':
-                if len(self.extrems)<=1:
-                    self.extrems.append([(x,y,w,h),[puntsA,puntsB],orientacio])                    
+                if len(self.extrems) ==0:
+                    
+                    #Quan hi ha una fitxa, mirar els seus dos punts
+                    puntsExtrem = puntsA
+                    self.extrems.append([(x,y,w,h),[puntsA,puntsB],orientacio,puntsExtrem])
+                elif len(self.extrems)==1:
+                    
+                    puntsExtrem = 55
+                    ultimaFitxa = self.extrems[0]
+                    xi = ultimaFitxa[0][0]-x
+                    yi = ultimaFitxa[0][1]-y
+                    dist = math.sqrt((xi)**2 + (yi)**2)                  
+                   
+                    if ultimaFitxa[2] == 1: #vertical
+                        if x <= ultimaFitxa[0][0]-(ultimaFitxa[1][0]/2):
+                            if orientacio == 0:
+                                puntsExtrem = puntsA
+                            else:
+                                if y <= ultimaFitxa[0][1]-(ultimaFitxa[1][1]/2):
+                                    puntsExtrem = puntsA
+                                else:
+                                    puntsExtrem = puntsB
+                        else:
+                            if orientacio == 0:
+                                puntsExtrem = puntsB
+                            else:
+                                if y <= ultimaFitxa[0][1]-(ultimaFitxa[1][1]/2):
+                                    puntsExtrem = puntsB
+                                else:
+                                    puntsExtrem = puntsA
+                    else:
+                        if y <= ultimaFitxa[0][1] - (ultimaFitxa[1][1]/2):
+                            if orientacio == 1:
+                                puntsExtrem = puntsA
+                            else:
+                                if x <= ultimaFitxa[0][0] - (ultimaFitxa[1][0]):
+                                    puntsExtrem = puntsA
+                                else:
+                                    puntsExtrem = puntsB
+                        else:
+                            if x <= ultimaFitxa[0][0] - (ultimaFitxa[1][0]):
+                                puntsExtrem = puntsA
+                            else:
+                                puntsExtrem = puntsB
+        
+                    
+                    self.extrems.append([(x,y,w,h),[puntsA,puntsB],orientacio,puntsExtrem])
+                    
                 else:
                     trobada = False
                     for f in self.tempEstatPartida[zona]:
@@ -371,16 +417,74 @@ class ModulVisio():
                             break
                             
                     if not trobada:
+
+                        
                         f1 = self.extrems[0]
                         f2 = self.extrems[1]
-                        dist1 = math.sqrt( (f1[0][0]-x)**2 + (f1[0][1]-y)**2 )
-                        dist2 = math.sqrt( (f2[0][0]-x)**2 + (f2[0][1]-y)**2 )
-                    
-                        if(dist1<dist2):
-                            self.extrems[0]=[(x,y,w,h),[puntsA,puntsB],orientacio]
+                        
+                        xi = f1[0][0]-x
+                        yi = f1[0][1]-y
+                        
+                        xj = f2[0][0]-x
+                        yj = f2[0][1]-y
+                        
+                        dist1 = math.sqrt( (xi)**2 + (yi)**2 )
+                        dist2 = math.sqrt( (xj)**2 + (yj)**2 )
+                        
+                        indexFitxa = 0
+                        puntsExtrem = 0
+                        ultimaFitxa = None
+                        distancia =0.0
+                        
+                        
+                        if(dist1<=dist2):
+                            indexFitxa = 0
+                            ultimaFitxa = self.extrems[0]
+                            distancia = dist1
+                            
                         elif(dist1>dist2):
-                            self.extrems[1]=[(x,y,w,h),[puntsA,puntsB],orientacio]                
-                    
+                            indexFitxa = 1
+                            ultimaFitxa = self.extrems[1]
+                            distancia = dist2
+                        
+
+                        if ultimaFitxa[2] == 1: #vertical
+                            if x <= ultimaFitxa[0][0]-(ultimaFitxa[1][0]/2):
+                                if orientacio == 0:
+                                    puntsExtrem = puntsA
+                                else:
+                                    if y <= ultimaFitxa[0][1]-(ultimaFitxa[1][1]/2):
+                                        puntsExtrem = puntsA
+                                    else:
+                                        puntsExtrem = puntsB
+                            else:
+                                if orientacio == 0:
+                                    puntsExtrem = puntsB
+                                else:
+                                    if y <= ultimaFitxa[0][1]-(ultimaFitxa[1][1]/2):
+                                        puntsExtrem = puntsA
+                                    else:
+                                        puntsExtrem = puntsB
+                        else:
+                            if x <= ultimaFitxa[0][0]-(ultimaFitxa[1][0]/2):
+                                if orientacio == 0:
+                                    puntsExtrem = puntsA
+                                else:
+                                    if y <= ultimaFitxa[0][1]-(ultimaFitxa[1][1]/2):
+                                        puntsExtrem = puntsA
+                                    else:
+                                        puntsExtrem = puntsB
+                            else:
+                                if orientacio == 0:
+                                    puntsExtrem = puntsB
+                                else:
+                                    if y <= ultimaFitxa[0][1]-(ultimaFitxa[1][1]/2):
+                                        puntsExtrem = puntsB
+                                    else:
+                                        puntsExtrem = puntsA
+                                
+   
+                        self.extrems[indexFitxa]=[(x,y,w,h),[puntsA,puntsB],orientacio,puntsExtrem]
         
         self.tempEstatPartida = self.estatPartida.copy()  
         self.estatPartida['extrems']=self.extrems
