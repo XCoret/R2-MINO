@@ -139,12 +139,6 @@ def getEndings(board):
 
     return ending1, ending2, contiguous1, contiguous2
 
-def setNewPosition(token, x, y, o):
-    newToken = token.copy()
-    newToken[0] = (x,y,4,2)
-    newToken[2] = o
-    return newToken
-
 def common_elements(list1, list2):
     result = []
     for element in list1:
@@ -224,78 +218,185 @@ def getBestOption(possibleTokens):
     else:
         #Retorna el mès gran
         return possibleTokens[sortedByValue[0][0]]
-        
 
-# return action, cToken0, cToken1
+def calculateOrientation(orientationO, extremValue, token):
+    isFirst = None
+    if (extremValue == token[1][0]):
+        isFirst == True
+    elif (extremValue == token[1][1]):
+        isFirst == False
+        
+    if (orientationO == "N"):
+        if isFirst:
+            return "W"
+        else:
+            return "E"        
+    elif (orientationO == "S"):
+        if isFirst:
+            return "E"
+        else:
+            return "W" 
+    elif (orientationO == "E"):
+        if isFirst:
+            return "N"
+        else:
+            return "S" 	
+    elif (orientationO == "W"):
+        if isFirst:
+            return "S"
+        else:
+            return "N" 	
+
+def placeToken(board, extrem, extremValue, token):
+    # Trobar peça proxima a extrem
+    # Saber tipus de extrem, i token
+
+    #Eliminar direcció que bloqueja la proxima
+
+    #Segons si extrem es doble
+        # coredenades de lextrem
+    # else
+        # Segons si extrem es vertical
+            # Segons si valor extrem es el de sobre
+                # Coordenada y extrem + 1
+                # Coordenada X extrem igual
+            # else
+                # Coordenada Y extrem - 1
+                # Coordenada X extrem igual
+        # else
+            # Segons si valor extrem es el primer
+                # Coordenada X extrem - 1
+                # Coordenada Y extrem igual
+            # else
+                # Coordenada X extrem + 1
+                # Coordenada Y extrem igual
+
+    # Calcular proximitat amb les parets respecte del cooredenades calculades per ordre considerar orientació del doble
+
+    # Si N - D
+        # Si N vartical
+            # Comrpovar si N o S son valids
+            # Si N
+                # Coordenada calculada y + 2
+                # Coordenada calculada X igual
+            # else si S
+                # Coordenada calculada y - 2
+                # Coordenada calculada X igual
+            # return [cXA, cYA, "S"]
+        # Else
+            # Comrpovar si E o W son valids
+            # Si E
+                # Coordenada calculada x + 2
+                # Coordenada calculada y igual 
+            # else si W
+                # Coordenada calculada x - 2
+                # Coordenada calculada y igual 
+           # return [cXA, cYA, "E"]
+        
+    # else Si D - N
+        # Si D vartical
+            # Triar orientació objectiu
+            # Si N
+                # Coordenada calculada y + 4
+                # Coordenada calculada X igual
+                # O = calculate orientation(orientationO, extremValue, token)
+                # return [cXA, cYA, calculateOrientation("N", token)]
+            # else si S
+                # Coordenada calculada y - 4
+                # Coordenada calculada X igual
+                # return [cXA, cYA, calculateOrientation("S", token)]
+            # else si E
+                # Coordenada calculada X + 3
+                # Coordenada calculada Y igual
+                # return [cXA, cYA, calculateOrientation("E", token)]
+            # else si W
+                # Coordenada calculada X - 3
+                # Coordenada calculada Y igual
+                # return [cXA, cYA, calculateOrientation("W", token)]
+        # Else
+            # Triar orientació objectiu
+            # Si N
+                # Coordenada calculada y + 3
+                # Coordenada calculada X igual
+                # return [cXA, cYA, calculateOrientation("N", token)]
+            # else si S
+                # Coordenada calculada y - 3
+                # Coordenada calculada X igual
+                # return [cXA, cYA, calculateOrientation("S", token)]
+            # else si E
+                # Coordenada calculada X + 4
+                # Coordenada calculada Y igual
+                # return [cXA, cYA, calculateOrientation("E", token)]
+            # else si W
+                # Coordenada calculada X - 4
+                # Coordenada calculada Y igual
+                # return [cXA, cYA, calculateOrientation("W", token)]
+  
+    # else Si N - N
+        # Triar orientació objectiu, bloquejar la banda de l'altre valor de la N
+        # Si N 
+            # Coordenada calculada y + 3
+            # Coordenada calculada X igual
+            # return [cXA, cYA, calculateOrientation("N", token)]
+        # else si S
+            # Coordenada calculada y - 3
+            # Coordenada calculada X igual
+            # return [cXA, cYA, calculateOrientation("S", token)]
+        # else si E
+            # Coordenada calculada X + 3
+            # Coordenada calculada Y igual
+            # return [cXA, cYA, calculateOrientation("E", token)]
+        # else si W
+            # Coordenada calculada X - 3
+            # Coordenada calculada Y igual
+            # return [cXA, cYA, calculateOrientation("W", token)]
+
+# return action, coordinatesO, coordinatesD, orientationD
 # action "t" -> tirar
 # action "a" -> agafar
 # action "p" -> passar
-# firstToken: token a moure
-# secondToken: token resultant de moure cToken0
 def doAction(gameDictionary):
     robotHand = gameDictionary["maRobot"]
     board = gameDictionary["taulell"]
     well = gameDictionary["pou"]
-
-    firstToken = None
-    secondToken = None
-    tokensInBoard = len(board)
     
     if len(board) == 0:
         ## la partida acaba de començar
-        md, ms, indexMaxRobot, indexDoubleRobot = getDoublesAndMax(robotHand)
+        md, ms, indexMaxRobot, indexDoubleRobot = getDoublesAndMax(robotHand) #CANVIAR RETURN
         if indexDoubleRobot != -1:
             firstToken = robotHand[indexDoubleRobot]
         else:
             firstToken = robotHand[indexMaxRobot]
 
-        # center table
-        x = 30
-        y = 30
-        o = 1
-        secondToken = setNewPosition(firstToken, x, y, o)
+        coordinatesO = firstToken[0][0:2]
+        coordinatesD = (0, 25)
+        orientationD = "W"
+        
         #TIRAR
-        return "t", firstToken, secondToken
+        return "t", coordinatesO, coordinatesD, orientationD
         
-    elif len(board) == 1:
-        tokenBoard = board[0]
-        possibleNumbers = tokenBoard[1]
-        possibleTokens = getPossibleTokensToPlay(possibleNumbers, robotHand)
+    elif len(board) >= 1:
+        extrems = gameDictionary["extrems"]
+        possibleTokens, extrem, extremValue = getPossibleTokensToPlay(extrems, robotHand) # FUNCIONA? 
+        
         if len(possibleTokens) == 0:
             if len(well) == 0:
                 # PASSAR
-                return "p", None, None
+                return "p", None, None, None
             else:
-                firstToken = getRandomTokenFromWell(well)
-                handPlaceCoordinates = getEmptySpaceFromHand(robotHand)
+                token = getRandomTokenFromWell(well) #ASSEGURAR QUE HO POT FER ENCARA QUE ESTIGUI AL REVES
+                coordinatesD = getEmptySpaceFromHand(robotHand) #Arreglar
+                coordinatesO = token[0][0:2]
                 # AGAFAR
-                return "a", firstToken, handPlaceCoordinates
+                return "a", coordinatesO, coordinatesD, "N"
         else:
             # choose best token from possibleTokens
-            bestOption = getBestOption(possibleTokens)
-            # secondToken = calculateNewPosition(firstToken, tokenBoard) #Equip Visio
-            # TIRAR
-            return "t", firstToken, secondToken
-        
-    elif len(board) > 1:
-        ending1, ending2, contiguous1, contiguous2 = getEndings(board)
-        #possibleNumbers = getPossibleNumbers(ending1, ending2, contiguous1, contiguous2) #Marian
-        possibleNumbers = [] #AUXILIAR
-        possibleTokens = getPossibleTokensToPlay(possibleNumbers, robotHand)
-        if len(possibleTokens) == 0:
-            if len(well) == 0:
-                # PASSAR
-                return "p", None, None
-            else:
-                firstToken = getRandomTokenFromWell(well)
-                handPlaceCoordinates = getEmptySpaceFromHand(robotHand)
-                # AGAFAR
-                return "a", firstToken, handPlaceCoordinates
-        else:
-            # choose best token from possibleTokens
-            firstToken = getBestOption(possibleTokens)
-            # boardCoordinates = calculateNewPosition(firstToken, endingUsed)
-            return "t", firstToken, boardCoordinates
+            token = getBestOption(possibleTokens)
+            
+            coordinatesD, orientationD = placeToken(board, extrem, extremValue, token) # FER
+            coordinatesO = token[0][0:2]
+            #TIRAR
+            return "t", coordinatesO, coordinatesD, orientationD
 
 
 ## TESTS ##

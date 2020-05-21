@@ -146,7 +146,7 @@ def playTurn(player):
             #Demanar diccionary estat
             gameStatus = v.getGameStatus()
 
-            #Demanar accio
+            #Demanar accio ARREGLAR
             action, cToken0, rTokenO, coordinatesD, rotationD = d.doAction(gameStatus) 
 
             if(action == "t"):
