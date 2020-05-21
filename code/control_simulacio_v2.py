@@ -598,15 +598,13 @@ def playTurn(player):
             gameStatus = v.getGameStatus()
 
             #Demanar accio
-            action, cToken0, rTokenO, coordinatesD, rotationD = d.doAction(gameStatus) 
+            action, cToken0, coordinatesD, rotationD = d.doAction(gameStatus) 
 
             if(action == "t"):
                 
-                m.moveTo(coordinatesH[0], coordinatesH[1]) #Arreglar al moviment (bloqeuix fins que acaba)
-                m.action("c", orientationH) #Arreglar al moviment (bloqeuix fins que acaba)
-
-                m.moveTo(coordinatesB[0], coordinatesB[1])
-                m.action("d", orientationB)
+                goCatch(cToken0[0], cToken0[1], "N")
+                token = getTokenByCoordinates(cToken0[0], cToken0[1])
+                goDrop(coordinatesD[0], coordinatesD[1], rotationD, token)
 
                 if (len(robotHand) == 1):
                     playing = False
@@ -618,16 +616,17 @@ def playTurn(player):
                 
             elif(action == "a"):
 
-                m.moveTo(coordinatesNewToken[0], coordinatesNewToken[1]) #FER Quan simulació
-                m.action("c", orientationNT) 
-
-                m.moveTo(coordinatesnewTokenHand[0], coordinatesnewTokenHand[1])
+                goCatch(cToken0[0], cToken0[1], "W")
+                token = getTokenByCoordinates(cToken0[0], cToken0[1])
+                goDrop(coordinatesD[0], coordinatesD[1], rotationD, token)
+                token.setBack(False)
 
                 #IDLE
                 m.idlePosition()
 
             elif(action == "p"):
                 skipRobot = True
+                playing = False
                 m.signalPass()
                 
             time.sleep(1)
