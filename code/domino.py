@@ -146,7 +146,11 @@ def common_elements(list1, list2):
             result.append(element)
     return result
 
-def getPossibleTokensToPlay(numbers, hand):
+def getPossibleTokensToPlay(extrems, hand):
+    numbers = []
+    for i in extrems:
+        numbers.append(i[3])
+
     possibleTokens =  {}
     for key in hand:
         token = hand[key]
@@ -245,111 +249,191 @@ def calculateOrientation(orientationO, extremValue, token):
         if isFirst:
             return "S"
         else:
-            return "N" 	
+            return "N"
+
+def getClosestToken(board, extrem):
+    closestToken = None
+    closestDist = 5000
+    cXP = extrem[0][0]
+    cYP = extrem[0][1]
+    
+    for i in board:
+        tX = board[i][0][0]
+        tY = board[i][0][1]
+        
+        dist = math.sqrt((tX - cXP)**2 + (tY - cYP)**2)
+
+        if dist < closestDist:
+            closestDist = dist
+            closestToken = board[i]
+
+    return closestToken
+
+def getDirectionBlocked(proxima, extrem):
+    blockedList = []
+        if (extrem[0][0] > proxima[0][0]):
+            blockedList.append("W")
+        else:
+            blockedList.append("E")
+        if (extrem[0][1] > proxima[0][1]):
+            blockedList.append("S")
+        else:
+            blockedList.append("N")
+    return blockedList
+
+def getDistancesFromBoard(cXR, cYR, isExtremDouble, isExtremVertical):
+    distDict = {}
+
+    distDict["N"] = abs(cYR - 45)
+    distDict["S"] = abs(cYR - 5)
+    distDict["E"] = abs(cXR - 20)
+    distDict["W"] = abs(cXR + 20)
+    
+    if isExtremDouble:
+        if isExtremVertical:
+            distDict["N"] = abs(cYR - 45) - 1
+            distDict["S"] = abs(cYR - 5) - 1
+        else:
+            distDict["E"] = abs(cXR - 20) - 1
+            distDict["W"] = abs(cXR + 20) - 1
+
+    #Ordenar de mès gran a mès petit
+    distDict = {k: v for k, v in sorted(distDict.items(), key=lambda item: item[1], reverse=True)}
+    
+    return distDict
 
 def placeToken(board, extrem, extremValue, token):
+    isExtremVertical = None
+    isExtremDouble = None
+    isTokenDouble = None
+    isFirstValue = None
+    cXR, cYR = None
+    cXA, cYA = None
+    
     # Trobar peça proxima a extrem
-    # Saber tipus de extrem, i token
+    proxima = getClosestToken(board, extrem)
+    
+    # Saber tipus de extrem, i token    
+    if (extrem[2] == 1:
+        isExtremVertical = True
+    else:
+        isExtremVertical = False
+        
+    if (extrem[1][0] == extrem[1][1]:
+        isExtremDouble = True
+    else:
+        isExtremDouble = False
+
+    if (token[1][0] == token[1][1]:
+        isTokenDouble = True
+    else:
+        isTokenDouble = False
 
     #Eliminar direcció que bloqueja la proxima
+    dirBlocked = getDirectionsBlocked(proxima, extrem)
 
-    #Segons si extrem es doble
-        # coredenades de lextrem
-    # else
-        # Segons si extrem es vertical
-            # Segons si valor extrem es el de sobre
-                # Coordenada y extrem + 1
-                # Coordenada X extrem igual
-            # else
-                # Coordenada Y extrem - 1
-                # Coordenada X extrem igual
-        # else
-            # Segons si valor extrem es el primer
-                # Coordenada X extrem - 1
-                # Coordenada Y extrem igual
-            # else
-                # Coordenada X extrem + 1
-                # Coordenada Y extrem igual
+    #Trobar cooredenades de referéncia
+    if isExtremDouble:
+        (cXR, cYR) = extrem[0][0:2]
+    else:
+        if isExtremVertical:
+            if (extrem[1][0] == extremValue):
+                isFirstValue = True
+                cXR = extrem[0][0]
+                cYR = extrem[0][1] + 1
+                
+            elif (extrem[1][1] == extremValue):
+                isFirstValue = False
+                cXR = extrem[0][0]
+                cYR = extrem[0][1] - 1
+        else:
+            if (extrem[1][0] == extremValue):
+                isFirstValue = True
+                cXR = extrem[0][0] - 1
+                cYR = extrem[0][1]
+                
+            elif (extrem[1][1] == extremValue):
+                isFirstValue = False
+                cXR = extrem[0][0] + 1
+                cYR = extrem[0][1]
 
-    # Calcular proximitat amb les parets respecte del cooredenades calculades per ordre considerar orientació del doble
+    # Calcular proximitat amb les parets respecte del cooredenades calculades de referéncia per ordre considerant la orientació del doble
+    distDict = getDistancesFromBoard(cXR, cYR, isExtremDouble, isExtremVertical)
 
-    # Si N - D
-        # Si N vartical
-            # Comrpovar si N o S son valids
-            # Si N
-                # Coordenada calculada y + 2
-                # Coordenada calculada X igual
-            # else si S
-                # Coordenada calculada y - 2
-                # Coordenada calculada X igual
-            # return [cXA, cYA, "S"]
-        # Else
-            # Comrpovar si E o W son valids
-            # Si E
-                # Coordenada calculada x + 2
-                # Coordenada calculada y igual 
-            # else si W
-                # Coordenada calculada x - 2
-                # Coordenada calculada y igual 
-           # return [cXA, cYA, "E"]
-        
-    # else Si D - N
-        # Si D vartical
-            # Triar orientació objectiu
-            # Si N
-                # Coordenada calculada y + 4
-                # Coordenada calculada X igual
-                # O = calculate orientation(orientationO, extremValue, token)
-                # return [cXA, cYA, calculateOrientation("N", token)]
-            # else si S
-                # Coordenada calculada y - 4
-                # Coordenada calculada X igual
-                # return [cXA, cYA, calculateOrientation("S", token)]
-            # else si E
-                # Coordenada calculada X + 3
-                # Coordenada calculada Y igual
-                # return [cXA, cYA, calculateOrientation("E", token)]
-            # else si W
-                # Coordenada calculada X - 3
-                # Coordenada calculada Y igual
-                # return [cXA, cYA, calculateOrientation("W", token)]
-        # Else
-            # Triar orientació objectiu
-            # Si N
-                # Coordenada calculada y + 3
-                # Coordenada calculada X igual
-                # return [cXA, cYA, calculateOrientation("N", token)]
-            # else si S
-                # Coordenada calculada y - 3
-                # Coordenada calculada X igual
-                # return [cXA, cYA, calculateOrientation("S", token)]
-            # else si E
-                # Coordenada calculada X + 4
-                # Coordenada calculada Y igual
-                # return [cXA, cYA, calculateOrientation("E", token)]
-            # else si W
-                # Coordenada calculada X - 4
-                # Coordenada calculada Y igual
-                # return [cXA, cYA, calculateOrientation("W", token)]
-  
-    # else Si N - N
-        # Triar orientació objectiu, bloquejar la banda de l'altre valor de la N
-        # Si N 
-            # Coordenada calculada y + 3
-            # Coordenada calculada X igual
-            # return [cXA, cYA, calculateOrientation("N", token)]
-        # else si S
-            # Coordenada calculada y - 3
-            # Coordenada calculada X igual
-            # return [cXA, cYA, calculateOrientation("S", token)]
-        # else si E
-            # Coordenada calculada X + 3
-            # Coordenada calculada Y igual
-            # return [cXA, cYA, calculateOrientation("E", token)]
-        # else si W
-            # Coordenada calculada X - 3
-            # Coordenada calculada Y igual
-            # return [cXA, cYA, calculateOrientation("W", token)]
+    # Restar les ja descartades del diccionari de longituds
+     for i in dirBlocked:
+	distDict.pop(i, None)
+
+    # Si extrem Normal - nou token Doble
+    if (not isExtremDouble and isTokenDouble):
+        if isExtremVertical:
+            if isFirstValue:
+                cXA = cXR
+                cYA = cYR + 2
+            else:
+                cXA = cXR
+                cYA = cYR - 2
+            return [cXA, cYA, "S"]
+        else:
+            if isFirstValue:
+                cXA = cXR - 2
+                cYA = cYR
+            else:
+                cXA = cXR + 2
+                cYA = cYR
+            return [cXA, cYA, "E"]
+
+    # Si extrem Doble - nou token Normal
+    elif (isExtremDouble and not isTokenDouble):
+        direccio = next(iter(distDict)
+        if isExtremVertical:
+            if (direccio == "N"):
+                cXA = cXR
+                cYA = cYR + 4
+            elif (direccio == "S"):
+                cXA = cXR
+                cYA = cYR - 4
+            elif (direccio == "E"):
+                cXA = cXR + 3
+                cYA = cYR 
+            elif (direccio == "W"):
+                cXA = cXR - 3
+                cYA = cYR 
+        else:
+            if (direccio == "N"):
+                cXA = cXR
+                cYA = cYR + 3
+            elif (direccio == "S"):
+                cXA = cXR
+                cYA = cYR - 3
+            elif (direccio == "E"):
+                cXA = cXR + 4
+                cYA = cYR 
+            elif (direccio == "W"):
+                cXA = cXR - 4
+                cYA = cYR 
+         
+        return [cXA, cYA, calculateOrientation(direccio, token)]
+
+    # Si extrem Normal - nou token Normal
+    elif (not isExtremDouble and not isTokenDouble):
+        direccio = next(iter(distDict)
+
+        if (direccio == "N"):
+            cXA = cXR
+            cYA = cYR + 3
+        elif (direccio == "S"):
+            cXA = cXR
+            cYA = cYR - 3
+        elif (direccio == "E"):
+            cXA = cXR + 3
+            cYA = cYR 
+        elif (direccio == "W"):
+            cXA = cXR - 3
+            cYA = cYR 
+
+        return [cXA, cYA, calculateOrientation(direccio, token)]
+
 
 # return action, coordinatesO, coordinatesD, orientationD
 # action "t" -> tirar
@@ -362,7 +446,7 @@ def doAction(gameDictionary):
     
     if len(board) == 0:
         ## la partida acaba de començar
-        md, ms, indexMaxRobot, indexDoubleRobot = getDoublesAndMax(robotHand) #CANVIAR RETURN
+        md, ms, indexMaxRobot, indexDoubleRobot = getDoublesAndMax(robotHand)
         if indexDoubleRobot != -1:
             firstToken = robotHand[indexDoubleRobot]
         else:
@@ -377,25 +461,33 @@ def doAction(gameDictionary):
         
     elif len(board) >= 1:
         extrems = gameDictionary["extrems"]
-        possibleTokens, extrem, extremValue = getPossibleTokensToPlay(extrems, robotHand) # FUNCIONA? 
+        possibleTokens = getPossibleTokensToPlay(extrems, robotHand) 
         
         if len(possibleTokens) == 0:
             if len(well) == 0:
                 # PASSAR
                 return "p", None, None, None
             else:
-                token = getRandomTokenFromWell(well) #ASSEGURAR QUE HO POT FER ENCARA QUE ESTIGUI AL REVES
-                coordinatesD = getEmptySpaceFromHand(robotHand) #Arreglar
+                token = getRandomTokenFromWell(well) #ASSEGURAR QUE HO POT FER ENCARA QUE ESTIGUI AL REVES COMENTAR A VISIO
+                coordinatesD = getEmptySpaceFromHand(robotHand)
                 coordinatesO = token[0][0:2]
                 # AGAFAR
                 return "a", coordinatesO, coordinatesD, "N"
         else:
-            # choose best token from possibleTokens
-            token = getBestOption(possibleTokens)
+            extrem, extremValue = None
             
-            coordinatesD, orientationD = placeToken(board, extrem, extremValue, token) # FER
+            token = getBestOption(possibleTokens)
+
+            if (token[1][0] == extrems[0][3] or token[1][1] == extrems[0][3]):
+                extrem = extrems[0]
+                extremValue = extrems[0][3]
+            elif (token[1][0] == extrems[1][3] or token[1][1] == extrems[1][3]):
+                extrem = extrems[1]
+                extremValue = extrems[1][3]
+
+            coordinatesD, orientationD = placeToken(board, extrem, extremValue, token) 
             coordinatesO = token[0][0:2]
-            #TIRAR
+            # TIRAR
             return "t", coordinatesO, coordinatesD, orientationD
 
 
