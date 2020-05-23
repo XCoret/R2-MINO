@@ -499,7 +499,49 @@ def simCreateGame():
     pygame.display.update()
 
 
-    #Put upsidedown de rest on the well
+def printTokensFromDictionary(robotTokens, humanTokens, boardTokens, nWell):
+    global fitxes
+
+    for i in range len(robotTokens):
+        x, y = coordinates2Pixels(-22.5, (6.5 + 2.5 * i), 1)
+        fitxes.add(Fitxa(str(robotTokens[i]),x,y,(20,40)))
+
+    for i in range len(humanTokens):
+        x, y = coordinates2Pixels(22.5, (6.5 + 2.5 * i), 1)
+        fitxes.add(Fitxa(str(humanTokens[i]),x,y,(20,40)))
+
+    for i in range len(boardTokens):
+        x, y = coordinates2Pixels(22.5, (6.5 + 2.5 * i), 1)
+        newToken = Fitxa(str(boardTokens[i][0]),x,y,(20,40))
+        newToken.directRotate() #falta
+        fitxes.add(newToken)
+
+    
+    for i in range(nWell):
+        x, y = coordinates2Pixels((-16.25 + 2.5 * i), 47.5, 1)
+        newToken = Fitxa(str(0),x,y,(20,40))
+        newToken.directRotate(0)
+        newToken.setBack(True)
+        fitxes.add(newToken)
+
+    
+
+# ----- DEMO TESTS FOR VIDEO ----- #
+
+# Robot responds to human first turn on a D - N situation. Robot prioratize bigger token with repeated values
+def testScenario1():
+    print ("test 1")
+
+    # Status
+    gameDictionary = {}
+    humanTokens = []
+    robotTokens = []
+    boardTokens = {0: [,]}
+    nWell = 0
+
+    # Variables
+
+# ----- DEMO TESTS FOR VIDEO ----- #
 
 def eventQuitFuncion():
     global simulationRunning
@@ -568,7 +610,7 @@ def playTurn(player):
     player = "h" ##TODO treure, es nomes per test 
     
     if(player == "h" and not skipButton):
-        
+        skipButton = True
         while playing:
             eventMoveTokenFunction()
             #gameStatus = v.getGameStatus() ##COMENTAT PER TEST
@@ -592,7 +634,7 @@ def playTurn(player):
             time.sleep(1)
             
     elif(player == "r" and not skipRobot):
-        
+        skipRobot = True
         while playing:
             #Demanar diccionary estat
             gameStatus = v.getGameStatus()
