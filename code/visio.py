@@ -28,7 +28,7 @@ class ModulVisio():
         self.midaFitxa = [0,0]
         self.rotacioDefecte = 0.0
         
-        self.estatPartida = None
+        self.estatPartida = {'maRobot':{},'maHuma':{},'taulell':{},'pou':{},'extrems':[]}
         self.tempEstatPartida = None
         
         
@@ -79,34 +79,32 @@ class ModulVisio():
     ###############################################################################################
     def contarPou(self):
         fitxaFrame = cv.absdiff(self.grayFrame,self.originalBackground)
+        
         midaMin = int((self.midaMin*self.frame.shape[1])/self.midaTaulell[0])
         midaMax = int((self.midaMax*self.frame.shape[0])/self.midaTaulell[1])
-        
         pou = fitxaFrame[0:midaMin,midaMin:midaMin+midaMax]
-        threshold = cv.GaussianBlur(pou,(5,5),0)
-        contours,hierarchy = cv.findContours(threshold,cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)   
-        zona='pou'
-        orientacio = 0
+        ret,threshold = cv.threshold(pou,10,255,cv.THRESH_TOZERO)
+        kernel = np.ones((5,5),np.uint8)
+        opening = cv.morphologyEx(threshold, cv.MORPH_OPEN, kernel)   
+        
+        contours, hierarchy = cv.findContours(opening, cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)
+        
         for i,c in enumerate(contours):
             if hierarchy[0][i,3]==-1:
                 rect = cv.minAreaRect(contours[i])
-                
                 x,y = self.robot_coords(rect[0])
-                
+
                 alcadaPixels = int((self.midaTaulell[1]*self.frame.shape[0])/self.midaTaulell[1]-5)
-            
-                w = round((rect[1][1]*self.midaTaulell[0])/self.frame.shape[1],2)
-                h = round((rect[1][0]*self.midaTaulell[1])/(alcadaPixels),2)
-                
-                if w>h:
+                w = round((rect[1][0]*self.midaTaulell[0])/self.frame.shape[1],2)
+                h = round((rect[1][1]*self.midaTaulell[1])/(alcadaPixels),2)
+
+                if h>w:
                     orientacio = 1
                 else:
                     orientacio = 0
-                
-                self.estatPartida[zona][len(self.estatPartida[zona])]=[(x,y,w,h),[0,0],orientacio]
-                
-      
-                    
+
+                self.estatPartida['pou'][len(self.estatPartida['pou'])]=[(round(x,3),round(y,3),w,h),[0,0],1]
+           
     ###############################################################################################
     
     def getFirstFeatures(self):
@@ -436,7 +434,7 @@ class ModulVisio():
                         ultimaFitxa = None
                         distancia =0.0
                         
-                        
+                       
                         if(dist1<=dist2):
                             indexFitxa = 0
                             ultimaFitxa = self.extrems[0]
@@ -447,7 +445,7 @@ class ModulVisio():
                             ultimaFitxa = self.extrems[1]
                             distancia = dist2
                         
-
+                        
                         if ultimaFitxa[2] == 1: #vertical
                             if x <= ultimaFitxa[0][0]-(ultimaFitxa[1][0]/2):
                                 if orientacio == 0:
@@ -506,6 +504,22 @@ class ModulVisio():
         y = int(y-((self.rotatedFrame.shape[0]-self.grayFrame.shape[0])/2))    
         return (x,y)
     ###############################################################################################
+    def robot_coords(self,pt):
+        # TODO 
+        # midaTaulell 
+        max_x=self.midaTaulell[0]
+        max_y=self.midaTaulell[1]
+        pt0 = pt[0]-self.grayFrame.shape[1]/2
+        pt1 = (pt[1]-self.grayFrame.shape[0])
+        
+        x = ((pt0*max_x)/self.grayFrame.shape[1])
+        y = -((pt1*max_y)/self.grayFrame.shape[0])
+        return(x,y)
+    
+    ###############################################################################################
+        
+
+
     def robot_coords(self,pt):
         # TODO 
         # midaTaulell 
