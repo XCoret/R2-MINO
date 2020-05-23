@@ -55,13 +55,13 @@ class C:
 
     def operateToolRotate(self, direction):
         if (direction == "N"):
-            return 270
-        elif (direction == "S"):
             return 90
+        elif (direction == "S"):
+            return 270
         elif (direction == "E"):
-            return 0
-        elif (direction == "W"):
             return 180
+        elif (direction == "W"):
+            return 0
             
     def operateToolLift(self, isLift):
         if(isLift):
