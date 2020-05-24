@@ -3,13 +3,6 @@
 S’encarrega de definir la jugada a realitzar a partir de l’estat de la 
 partida que rep del mòdul Control i també del nivell de dificultat seleccionat.
 '''
-
-'''
-Classe fitxa:
-    va : valor extrem A
-    vb : valor extrem B
-    orientacio : (0:horitzontal, 1:vertical)
-'''
 import random
 import math
 
@@ -509,29 +502,3 @@ def doAction(gameDictionary):
             coordinatesO = token[0][0:2]
             # TIRAR
             return "t", coordinatesO, coordinatesD, orientationD
-
-
-## TESTS ##
-##e1={
-##    'maRobot':{ 
-##            #idFitxa : [ (x,y,amplada,alçada), [ puntsEsquerra/Dalt, puntsDreta/Baix], orientació]
-##            0 :[(5,5,4,2),[1,1],0],
-##            1 :[(5,10,4, 2),[4,4],0],
-##            2 :[(5,15,4, 2),[4,2],0],
-##            3 :[(5,20,4, 2),[2,3],0]  
-##    },
-##    'maHuma':{ 
-##        0 :[(55,40,4,2),[1,2],0],
-##        1 :[(55,45,4, 2),[5,0],0] 
-##    },
-##    'taulell':{ 
-##        0 :[(26,24,4,2),[4,3],1],
-##        1 :[(23,25,4, 2),[6,3],0],
-##        2 :[(20,25,4, 2),[6,6],1]    
-##    },
-##    'pou':{}
-##}
-##
-##doAction(e1)
-
-#TO-DO: Col·locar la nova peça
