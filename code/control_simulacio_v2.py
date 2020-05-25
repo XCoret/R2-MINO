@@ -126,8 +126,8 @@ toggleTurn = True
 skipButton = False
 skipRobot = False
 winner = None
-
-
+isTest = False #Posar a test per simular
+toggleTest = False
 
 
 ## CALCULATE FUNCTIONS ##
@@ -427,8 +427,6 @@ def goDance():
     goTo(0, 20, False, None)
     closeTool()
     openTool()
-    closeTool()
-    openTool()
     goTo(-5, 25, False, None)
     goTo(0, 30, False, None)
     closeTool()
@@ -438,7 +436,6 @@ def goDance():
     closeTool()
     openTool()
     closeTool()
-    openTool()
 
 def goSignalPass():
     goIdle()
@@ -498,9 +495,6 @@ def simCreateGame():
     fitxes.update()
     pygame.display.update()
 
-
-    #Put upsidedown de rest on the well
-
 def eventQuitFuncion():
     global simulationRunning
     for event in pygame.event.get():
@@ -552,54 +546,465 @@ def eventMoveTokenFunction():
         if event.type == MOUSEBUTTONUP:
             tokenMoving = None
 
+def printTokensFromDictionary(gameDictionary, robotTokens, humanTokens, boardTokens, nWell):
+    print ("printTokensFromDictionary")
+    global fitxes
+    board = gameDictionary["taulell"]
 
-def playTurn(player):
+    for i in range (len(robotTokens)):
+        x, y = coordinates2Pixels(-22.5, (6.5 + 2.5 * i), 1)
+        newToken = Fitxa(str(robotTokens[i]),0,0,(20,40))
+        newToken.moveTo(x,y)
+        fitxes.add(newToken)
+
+    for i in range (len(humanTokens)):
+        x, y = coordinates2Pixels(22.5, (6.5 + 2.5 * i), 1)
+        newToken = Fitxa(str(humanTokens[i]),0,0,(20,40))
+        newToken.moveTo(x,y)
+        fitxes.add(newToken)
+
+    for i in range (len(boardTokens)):
+        x, y = coordinates2Pixels(board[i][0][0],board[i][0][1], 1)
+        newToken = Fitxa(str(boardTokens[i][0]),0,0,(20,40))
+        newToken.directRotate(boardTokens[i][1])
+        newToken.moveTo(x,y)
+        fitxes.add(newToken)
+
+    
+    for i in range(nWell):
+        x, y = coordinates2Pixels((-16.25 + 2.5 * i), 47.5, 1)
+        newToken = Fitxa(str(4),0,0,(20,40))
+        newToken.moveTo(x,y)
+        newToken.directRotate(0)
+        newToken.setBack(True)
+        fitxes.add(newToken)
+
+    printRutine()
+    fitxes.update()
+    pygame.display.update()
+
+# ----- DEMO TESTS FOR VIDEO ----- #
+
+# Show Board areas and movements
+def testHumanInteraction():
+    global isGame, initGame
+    simCreateGame()
+    # Control variables
+    initGame = False
+    isGame = True
+
+    return [None, "h"]
+def testScenario0():
+    global isEnd, isGame, isWon, initGame
+    simCreateGame()
+    time.sleep(2)
+    goIdle()
+    time.sleep(2)
+    goSignalPlayer("r")
+    time.sleep(2)
+    goSignalPlayer("h")
+    time.sleep(2)
+    goSignalPass()
+    time.sleep(2)
+    goDance()
+
+    # Control variables
+    isEnd = True
+    isGame = False
+    isWon = False
+    initGame = False
+    
+    
+# Robot responds to human first turn on a D - N situation. Robot prioratize bigger token with repeated values
+def testScenario1():
+    print ("test 1")
+    global isGame, initGame
+
+    # Status
+    gameDictionary ={
+        'maRobot':{ 
+                0 :[(-22.5,6.5,4,2),[1,1],0],
+                1 :[(-22.5,9,4, 2),[1,6],0],
+                2 :[(-22.5,11.5,4, 2),[0,4],0],
+                3 :[(-22.5,14,4, 2),[5,6],0],
+                4 :[(-22.5,16.5,4, 2),[1,3],0],
+                5 :[(-22.5,19,4, 2),[0,1],0] ,
+                6 :[(-22.5,21.5,4, 2),[5,5],0]   
+        },
+        'maHuma':{ 
+                0 :[(22.5,6.5,4,2),[0,0],0],
+                1 :[(22.5,9,4, 2),[3,5],0],
+                2 :[(22.5,11.5,4, 2),[2,3],0],
+                3 :[(22.5,14,4, 2),[4,4],0],
+                5 :[(22.5,19,4, 2),[2,2],0],
+                6 :[(22.5,21.5,4, 2),[6,4],0]  
+        },
+        'taulell':{ 
+            0 :[(0,25,4,2),[6,6],1]   
+        },
+        'extrems':{ 
+            0 :[(0,25,4,2),[6,6],1,6]   
+        },
+        'pou':{}
+    }
+
+    robotTokens = [8,13,5,27,10,2,26]
+    humanTokens = [1,21,15,23,14,25]
+    boardTokens = {0: [28,0]}
+    nWell = 14
+
+    printTokensFromDictionary(gameDictionary, robotTokens, humanTokens, boardTokens, nWell)
+
+    # Control variables
+    initGame = False
+    isGame = True
+
+    return [gameDictionary, "r"]
+
+# Robot responds to human turn on a N - D situation. Robot prioratize bigger double token
+def testScenario2():
+    print ("test 2")
+    global isGame, initGame
+
+    # Status
+    gameDictionary ={
+        'maRobot':{ 
+                0 :[(-22.5,6.5,4,2),[0,3],0],
+                1 :[(-22.5,9,4, 2),[5,5],0],
+                2 :[(-22.5,11.5,4, 2),[3,3],0],
+                3 :[(-22.5,14,4, 2),[1,4],0],
+                4 :[(-22.5,16.5,4, 2),[0,0],0]  
+        },
+        'maHuma':{ 
+                0 :[(22.5,6.5,4,2),[5,0],0],
+                1 :[(22.5,9,4, 2),[4,0],0],
+                2 :[(22.5,11.5,4, 2),[3,5],0],
+                3 :[(22.5,14,4, 2),[2,4],0],
+                5 :[(22.5,19,4, 2),[1,1],0] 
+        },
+        'taulell':{ 
+            0 :[(-3,25,4,2),[0,6],0],
+            1 :[(0,25,4,2),[6,6],1],
+            2 :[(3,25,4,2),[4,6],0],
+            3 :[(6,26,4,2),[3,4],1] 
+        },
+        'extrems':{ 
+            0 :[(-3,25,4,2),[0,6],0,0],
+            1 :[(6,26,4,2),[3,4],1,3]
+        },
+        'pou':{}
+    }
+
+    robotTokens = [4,26,19,11,1]
+    humanTokens = [6,5,21,16,8]
+    boardTokens = {
+        0: [7,90],
+        1: [28,0],
+        2: [25,270],
+        3: [20,0]
+    }
+    nWell = 14
+
+    printTokensFromDictionary(gameDictionary, robotTokens, humanTokens, boardTokens, nWell)
+
+    # Control variables
+    initGame = False
+    isGame = True
+
+    return [gameDictionary, "r"]
+
+# Robot responds to human turn on a N - N situation. Robot prioratize bigger token
+def testScenario3():
+    print ("test 3")
+    global isGame, initGame
+
+    # Status
+    gameDictionary ={
+        'maRobot':{ 
+                0 :[(-22.5,6.5,4,2),[0,3],0],
+                1 :[(-22.5,9,4, 2),[1,5],0],
+                2 :[(-22.5,11.5,4, 2),[3,6],0],
+                3 :[(-22.5,14,4, 2),[0,4],0],
+                4 :[(-22.5,16.5,4, 2),[0,5],0]  
+        },
+        'maHuma':{ 
+                0 :[(22.5,6.5,4,2),[1,1],0],
+                1 :[(22.5,9,4, 2),[2,4],0],
+                2 :[(22.5,11.5,4, 2),[3,5],0],
+                3 :[(22.5,14,4, 2),[5,5],0],
+                5 :[(22.5,19,4, 2),[1,4],0] 
+        },
+        'taulell':{ 
+            0 :[(-3,25,4,2),[0,6],0],
+            1 :[(0,25,4,2),[6,6],1],
+            2 :[(3,25,4,2),[4,6],0],
+            3 :[(6,26,4,2),[3,4],1] 
+        },
+        'extrems':{ 
+            0 :[(-3,25,4,2),[0,6],0,0],
+            1 :[(6,26,4,2),[3,4],1,3]
+        },
+        'pou':{}
+    }
+
+    robotTokens = [4,12,22,5,6]
+    humanTokens = [8,16,21,26,11]
+    boardTokens = {
+        0: [7,90],
+        1: [28,0],
+        2: [25,270],
+        3: [20,0]
+    }
+    nWell = 14
+
+    printTokensFromDictionary(gameDictionary, robotTokens, humanTokens, boardTokens, nWell)
+
+    # Control variables
+    initGame = False
+    isGame = True
+
+    return [gameDictionary, "r"]
+
+# Robot catch random token from well, then tries again  
+def testScenario4(isNext):
+    print ("test 4")
+    global isGame, initGame
+
+    # Status
+    if isNext:
+        gameDictionary ={
+            'maRobot':{ 
+                    0 :[(-22.5,6.5,4,2),[1,5],0],
+                    1 :[(-22.5,9,4,2),[0,3],0]
+            },
+            'maHuma':{ 
+                    0 :[(22.5,6.5,4,2),[1,1],0],
+                    1 :[(22.5,9,4, 2),[2,4],0],
+                    2 :[(22.5,11.5,4, 2),[3,5],0],
+                    3 :[(22.5,14,4, 2),[5,5],0],
+                    5 :[(22.5,19,4, 2),[1,4],0] 
+            },
+            'taulell':{ 
+                0 :[(-3,25,4,2),[0,6],0],
+                1 :[(0,25,4,2),[6,6],1],
+                2 :[(3,25,4,2),[4,6],0],
+                3 :[(6,26,4,2),[3,4],1] 
+            },
+            'extrems':{ 
+                0 :[(-3,25,4,2),[0,6],0,0],
+                1 :[(6,26,4,2),[3,4],1,3]
+            },
+            'pou':{
+                0 :[(-8.75,47.5,4,2),[0,3],0],
+                1 :[(1.25,47.5, 2),[0,3],0]
+            }
+        }
+
+    else:
+        gameDictionary ={
+            'maRobot':{ 
+                    0 :[(-22.5,6.5,4,2),[1,5],0]  
+            },
+            'maHuma':{ 
+                    0 :[(22.5,6.5,4,2),[1,1],0],
+                    1 :[(22.5,9,4, 2),[2,4],0],
+                    2 :[(22.5,11.5,4, 2),[3,5],0],
+                    3 :[(22.5,14,4, 2),[5,5],0],
+                    5 :[(22.5,19,4, 2),[1,4],0] 
+            },
+            'taulell':{ 
+                0 :[(-3,25,4,2),[0,6],0],
+                1 :[(0,25,4,2),[6,6],1],
+                2 :[(3,25,4,2),[4,6],0],
+                3 :[(6,26,4,2),[3,4],1] 
+            },
+            'extrems':{ 
+                0 :[(-3,25,4,2),[0,6],0,0],
+                1 :[(6,26,4,2),[3,4],1,3]
+            },
+            'pou':{
+                0 :[(-8.75,47.5,4,2),[0,3],0],
+                1 :[(1.25,47.5, 2),[0,3],0],
+                2 :[(8.75,47.5,4, 2),[0,3],0]
+            }
+        }
+
+    robotTokens = [12]
+    humanTokens = [8,16,21,26,11]
+    boardTokens = {
+        0: [7,90],
+        1: [28,0],
+        2: [25,270],
+        3: [20,0]
+    }
+    nWell = 14
+
+    if not isNext:
+        printTokensFromDictionary(gameDictionary, robotTokens, humanTokens, boardTokens, nWell)
+
+    # Control variables
+    initGame = False
+    isGame = True
+
+    return [gameDictionary, "r"]
+
+# Robot wons (empty hand)
+def testScenario5():
+    print ("test 5")
+    global isGame, initGame
+
+    # Status
+    gameDictionary ={
+        'maRobot':{ 
+                0 :[(-22.5,6.5,4,2),[0,3],0]  
+        },
+        'maHuma':{ 
+                0 :[(22.5,6.5,4,2),[1,1],0],
+                1 :[(22.5,9,4, 2),[2,4],0],
+                2 :[(22.5,11.5,4, 2),[3,5],0],
+                3 :[(22.5,14,4, 2),[5,5],0],
+                5 :[(22.5,19,4, 2),[1,4],0] 
+        },
+        'taulell':{ 
+            0 :[(-3,25,4,2),[0,6],0],
+            1 :[(0,25,4,2),[6,6],1],
+            2 :[(3,25,4,2),[4,6],0],
+            3 :[(6,26,4,2),[3,4],1] 
+        },
+        'extrems':{ 
+            0 :[(-3,25,4,2),[0,6],0,0],
+            1 :[(6,26,4,2),[3,4],1,3]
+        },
+        'pou':{}
+    }
+
+    robotTokens = [4]
+    humanTokens = [8,16,21,26,11]
+    boardTokens = {
+        0: [7,90],
+        1: [28,0],
+        2: [25,270],
+        3: [20,0]
+    }
+    nWell = 14
+
+    printTokensFromDictionary(gameDictionary, robotTokens, humanTokens, boardTokens, nWell)
+
+    # Control variables
+    initGame = False
+    isGame = True
+
+    return [gameDictionary, "r"]
+
+# Robot and Human can't play, so human won by counting tokens (less number wins)
+def testScenario6():
+    print ("test 6")
+    global isGame, initGame, isWon
+
+    # Status
+    gameDictionary ={
+        'maRobot':{ 
+                0 :[(-22.5,6.5,4,2),[1,1],0],
+                1 :[(-22.5,9,4, 2),[0,4],0],
+                2 :[(-22.5,11.5,4, 2),[1,3],0],
+                3 :[(-22.5,14, 2),[4,4],0] ,
+                4 :[(-22.5,16.5,4, 2),[5,5],0]   
+        },
+        'maHuma':{ 
+                0 :[(22.5,6.5,4,2),[0,0],0],
+                1 :[(22.5,9,4, 2),[3,5],0],
+                2 :[(22.5,11.5,4, 2),[2,3],0],
+                3 :[(22.5,14,4, 2),[0,1],0],
+                4 :[(22.5,16.5,4, 2),[2,2],0], 
+        },
+        'taulell':{ 
+            0 :[(0,25,4,2),[6,6],1]   
+        },
+        'extrems':{ 
+            0 :[(0,25,4,2),[6,6],1,6]   
+        },
+        'pou':{}
+    }
+
+    robotTokens = [8,5,10,23,26]
+    humanTokens = [1,21,15,2,14]
+    boardTokens = {0: [28,0]}
+    nWell = 0
+
+    printTokensFromDictionary(gameDictionary, robotTokens, humanTokens, boardTokens, nWell)
+
+    # Control variables
+    initGame = False
+    isGame = False
+    isWon = True
+
+    return [gameDictionary, "r"]
+    
+# ----- DEMO TESTS FOR VIDEO ----- #
+
+def playTurn(player, gameStatusTest):
     global isGame
     global isWon
     global winner
     global skipButton
     global skipRobot
+    global toggleTest
     playing = True
 
     #IDLE
     goIdle()
-    #gameStatusStart = v.getGameStatus() ##COMENTAT PER TEST
-    
-    player = "h" ##TODO treure, es nomes per test 
+
+    if not isTest:
+        gameStatusStart = v.getGameStatus() ##Llegir taulell
     
     if(player == "h" and not skipButton):
-        
+        skipButton = True
         while playing:
             eventMoveTokenFunction()
-            #gameStatus = v.getGameStatus() ##COMENTAT PER TEST
-            
-            #Ha tirat
-##            if len(gameStatus["taulell"]) > len(gameStatusStart["taulell"]):
-##                #Ha guanyat
-##                if (len(gameStatus["maHuma"]) == 0):
-##                    playing = False
-##                    isGame = False
-##                    isWon = True
-##                    winner = "h"
-##                else:
-##                    playing = False
-##
-##            elif len(gameStatus["pou"]) == 0:
-##                #Ha passat
-##                skipButton = True
-##                playing = False
+            if not isTest:
+                gameStatus = v.getGameStatus() ##Llegir taulell
                 
-            time.sleep(1)
+                #Ha tirat
+                if len(gameStatus["taulell"]) > len(gameStatusStart["taulell"]):
+                    #Ha guanyat
+                    if (len(gameStatus["maHuma"]) == 0):
+                        playing = False
+                        isGame = False
+                        isWon = True
+                        winner = "h"
+                    else:
+                        playing = False
+
+                elif len(gameStatus["pou"]) == 0:
+                    #Ha passat
+                    skipButton = True
+                    playing = False
+                    
+                time.sleep(1)
             
     elif(player == "r" and not skipRobot):
-        
+        print("ROBOT TURN")
+        skipRobot = True
         while playing:
             #Demanar diccionary estat
-            gameStatus = v.getGameStatus()
+            gameStatus = None
+            robotHand = None
 
+            #Test
+            if isTest:
+                gameStatus = gameStatusTest
+                if toggleTest:
+                    test = testScenario4(True)
+                    gameStatus = test[0]
+            else:
+                gameStatus = v.getGameStatus() ##Llegir taulell
+
+            robotHand = gameStatus["maRobot"]
+            
             #Demanar accio
             action, cToken0, coordinatesD, rotationD = d.doAction(gameStatus) 
 
+            print("ACTION: ", action)
             if(action == "t"):
                 
                 goCatch(cToken0[0], cToken0[1], "N")
@@ -613,6 +1018,9 @@ def playTurn(player):
                     winner = "r"
                     
                 playing = False
+
+                #IDLE
+                goIdle()
                 
             elif(action == "a"):
 
@@ -622,19 +1030,24 @@ def playTurn(player):
                 token.setBack(False)
 
                 #IDLE
-                m.idlePosition()
+                goIdle()
+
+                #TEST
+                toggleTest = True
 
             elif(action == "p"):
                 skipRobot = True
                 playing = False
-                m.signalPass()
+                goSignalPass()
                 
             time.sleep(1)
 
 
 
 def mainControlFunction():
-    global isEnd, isGame, toggleTurn, isWon, gameStatus, winner, initGame
+    global skipButton, skipRobot, isEnd, isGame, toggleTurn, isWon, gameStatus, winner, initGame, isTest
+    firstTurn = None
+    gameStatusTest = None
     
     ## TEST MOVIMENT DE FITXA ##
 
@@ -645,83 +1058,89 @@ def mainControlFunction():
     ##token.setBack(False)
 
     ## TEST MOVIMENT DE FITXA ##
-    gameStatusTEST ={
-    'maRobot':{ 
-            #idFitxa : [ (x,y,amplada,alçada), [ puntsEsquerra/Dalt, puntsDreta/Baix], orientació]
-            0 :[(5,5,4,2),[3,0],0],
-            1 :[(5,10,4, 2),[1,2],0],
-            2 :[(5,15,4, 2),[3,4],0]
-    },
-    'maHuma':{ 
-        0 :[(55,40,4,2),[6,6],0],
-        1 :[(55,45,4, 2),[5,5],0],
-        2 :[(5,15,4, 2),[4,1],0]
-    },
-    'taulell':{},
-    'pou':{}
-    } #TEST TOKEN MOVEMENT
-
+ 
     if initGame:
-        #IDLE
-        goIdle()
+        if isTest:
+            # Change testScenario number
+            test = testScenario0()
+            gameStatusTest = test[0]
+            firstTurn = test[1]
+            time.sleep(2)
+            goIdle()
+            time.sleep(2)
+        else:
+            #Initialize Board
+            simCreateGame()
+            
+            #IDLE
+            goIdle()
 
-        #Read hands for game setup
-        #gameStatus = v.getGameStatus() #AFEGIR QUAN VISIÓ 100% IMPLEMENTADA #COMENTAT PER TEST
+            #Read hands for game setup
+            gameStatus = v.getGameStatus() #Llegir taulell
 
-        firstTurn = d.getFirstTurn(gameStatusTEST) 
+            firstTurn = d.getFirstTurn(gameStatus) 
 
-        if (firstTurn == "h"):
-            secondTrun = "r"
-        elif (firstTurn == "r"):
-            secondTrun = "h"
+            if (firstTurn == "h"):
+                secondTrun = "r"
+            elif (firstTurn == "r"):
+                secondTrun = "h"
 
-        print(firstTurn)
-    
-        time.sleep(1)
+            print(firstTurn)
+        
+            time.sleep(1)
 
-        #Signal who starts
-        goSignalPlayer(firstTurn)
+            #Signal who starts
+            goSignalPlayer(firstTurn)
 
-        #IDLE
-        goIdle()
-    
-        time.sleep(1)
-    
-        isGame = True
-        initGame = False
+            #IDLE
+            goIdle()
+        
+            time.sleep(1)
+        
+            isGame = True
+            initGame = False
 
     if not isEnd:
         print("This is not the END")
         if isGame:
             print("IS GAME")
             if(toggleTurn):
-                playTurn(firstTurn)
+                print("FIRST TURN")
+                playTurn(firstTurn, gameStatusTest)
                 toggleTurn = False
             else:
-                playTurn(secondTurn)
+                playTurn(secondTurn, gameStatusTest)
                 toggleTurn = True
 
+            # No one can play
             if(skipButton and skipRobot):
                 isGame = False
                 isWon = True
-        if isWon:
+                
+        while isWon:
+            print("IS WON")
             if winner != None:
-                m.signalPlayer(winner)
+                print("winner: ", winner)
+                goSignalPlayer(winner)
                 isWon = False
                 isEnd = True
+                goDance()
+                goIdle()
             else:
-                gameStatus = v.getGameStatus() 
+                if isTest:
+                    # Change testScenario number
+                    gameStatus = gameStatusTest
+                else:
+                    gameStatus = v.getGameStatus() 
                 winner = d.getWinner(gameStatus, firstTurn)
-                
-    #m.dance() #COMENTAT PER TEST
 
-
-       
+        if isTest:
+            isEnd = True
 #--------------------------------------------------------------------------------------#
 #   SIMULATION                                                                         #
 #--------------------------------------------------------------------------------------#
 printRutine()
-simCreateGame()
+
 while(simulationRunning):
     eventQuitFuncion()
     mainControlFunction()

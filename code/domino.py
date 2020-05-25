@@ -3,14 +3,8 @@
 S’encarrega de definir la jugada a realitzar a partir de l’estat de la 
 partida que rep del mòdul Control i també del nivell de dificultat seleccionat.
 '''
-
-'''
-Classe fitxa:
-    va : valor extrem A
-    vb : valor extrem B
-    orientacio : (0:horitzontal, 1:vertical)
-'''
 import random
+import math
 
 print('Modul Joc Carregat!')
 
@@ -72,6 +66,7 @@ def getFirstTurn(gameDictionary):
             return "h" 
 
 def getWinner(gameDictionary, firstTurn):
+    print("getWinner")
     humanHand = gameDictionary["maHuma"]
     robotHand = gameDictionary["maRobot"]
 
@@ -148,25 +143,25 @@ def common_elements(list1, list2):
 
 def getPossibleTokensToPlay(extrems, hand):
     numbers = []
-    for i in extrems:
-        numbers.append(i[3])
-
-    possibleTokens =  {}
-    for key in hand:
-        token = hand[key]
-        tokenValues = token[1]
-        commons = common_elements(tokenValues, numbers)
-        for i in commons:
-            possibleTokens[i] = key
+    for i in extrems.keys():
+        numbers.append(extrems[i][3])
+    
+    possibleTokens =  []
+    for i in numbers:
+        for j in hand.keys():
+            if (hand[j][1][0] == i or hand[j][1][1] == i):
+                possibleTokens.append(hand[j])
+            
+    print("POSSIBLE TOKENS ", possibleTokens)
     return possibleTokens
 
 def getRandomTokenFromWell(well):
-    randomTokenIndex = random.randint(0,len(well))
+    randomTokenIndex = random.randint(0,(len(well)-1))
     return well[randomTokenIndex]
 
-def getEmptySpaceFromHand(robotHand): #ARREGLAR
+def getEmptySpaceFromHand(robotHand):
     if(len(robotHand) <= 11):
-        y = 6.5 + (2.5* (len(robotHand) - 1))
+        y = 6.5 + (2.5* (len(robotHand)))
         return [-22.5, y]
     else:
         y = 6.5 + (2.5* (len(robotHand) - 12))
@@ -215,13 +210,16 @@ def getBestOption(possibleTokens):
 
     if len(doublesIndexes) > 0:
         #Retorna el doble mès gran
-        return possibleTokens[list(doublesIndexes)[0:1][0][0]]
+        bestOption = possibleTokens[list(doublesIndexes)[0:1][0][0]]
     elif len(repeatedIndexes) > 0:
         #Retorna el repetit mès gran
-        return possibleTokens[repeatedIndexes[0][0]]
+        bestOption = possibleTokens[repeatedIndexes[0][0]]
     else:
         #Retorna el mès gran
-        return possibleTokens[sortedByValue[0][0]]
+        bestOption = possibleTokens[sortedByValue[0][0]]
+
+    print("BEST OPTION ", bestOption)
+    return bestOption
 
 def calculateOrientation(orientationO, extremValue, token):
     isFirst = None
@@ -256,20 +254,25 @@ def getClosestToken(board, extrem):
     closestDist = 5000
     cXP = extrem[0][0]
     cYP = extrem[0][1]
-    
-    for i in board:
-        tX = board[i][0][0]
-        tY = board[i][0][1]
-        
-        dist = math.sqrt((tX - cXP)**2 + (tY - cYP)**2)
 
-        if dist < closestDist:
-            closestDist = dist
-            closestToken = board[i]
+    if len(board) == 1:
+        closestToken = board[0]
+    else:
+        for i in board:
+            tX = board[i][0][0]
+            tY = board[i][0][1]
+            
+            dist = math.sqrt((tX - cXP)**2 + (tY - cYP)**2)
+
+            if dist < closestDist and board[i][1] != extrem[1]:
+                closestDist = dist
+                closestToken = board[i]
 
     return closestToken
 
-def getDirectionBlocked(proxima, extrem):
+def getDirectionsBlocked(proxima, extrem):
+    print("proxima ", proxima)
+    print("extrem ", extrem)
     blockedList = []
     if (extrem[0][0] > proxima[0][0]):
         blockedList.append("W")
@@ -307,8 +310,10 @@ def placeToken(board, extrem, extremValue, token):
     isExtremDouble = None
     isTokenDouble = None
     isFirstValue = None
-    cXR, cYR = None
-    cXA, cYA = None
+    cXR = None
+    cYR = None
+    cXA = None
+    cYA = None
     
     # Trobar peça proxima a extrem
     proxima = getClosestToken(board, extrem)
@@ -331,6 +336,7 @@ def placeToken(board, extrem, extremValue, token):
 
     #Eliminar direcció que bloqueja la proxima
     dirBlocked = getDirectionsBlocked(proxima, extrem)
+    print ("dirBlocked ", dirBlocked)
 
     #Trobar cooredenades de referéncia
     if isExtremDouble:
@@ -366,6 +372,7 @@ def placeToken(board, extrem, extremValue, token):
 
     # Si extrem Normal - nou token Doble
     if (not isExtremDouble and isTokenDouble):
+        print ("N - D Situation")
         if isExtremVertical:
             if isFirstValue:
                 cXA = cXR
@@ -373,7 +380,7 @@ def placeToken(board, extrem, extremValue, token):
             else:
                 cXA = cXR
                 cYA = cYR - 2
-            return [cXA, cYA, "S"]
+            return [(cXA, cYA), "S"]
         else:
             if isFirstValue:
                 cXA = cXR - 2
@@ -381,10 +388,11 @@ def placeToken(board, extrem, extremValue, token):
             else:
                 cXA = cXR + 2
                 cYA = cYR
-            return [cXA, cYA, "E"]
+            return [(cXA, cYA), "E"]
 
     # Si extrem Doble - nou token Normal
     elif (isExtremDouble and not isTokenDouble):
+        print ("D - N Situation")
         direccio = next(iter(distDict))
         if isExtremVertical:
             if (direccio == "N"):
@@ -413,11 +421,13 @@ def placeToken(board, extrem, extremValue, token):
                 cXA = cXR - 4
                 cYA = cYR 
          
-        return [cXA, cYA, calculateOrientation(direccio, token)]
+        return [(cXA, cYA), calculateOrientation(direccio, extremValue, token)]
 
     # Si extrem Normal - nou token Normal
     elif (not isExtremDouble and not isTokenDouble):
+        print ("N - N Situation ", cXR , " ", cYR)
         direccio = next(iter(distDict))
+        print ("direccio ", direccio)
 
         if (direccio == "N"):
             cXA = cXR
@@ -430,9 +440,10 @@ def placeToken(board, extrem, extremValue, token):
             cYA = cYR 
         elif (direccio == "W"):
             cXA = cXR - 3
-            cYA = cYR 
-
-        return [cXA, cYA, calculateOrientation(direccio, token)]
+            cYA = cYR
+            
+        print ("FINAL COORDINATES ", cXA , " ", cYA)
+        return [(cXA, cYA), calculateOrientation(direccio, extremValue, token)]
 
 
 # return action, coordinatesO, coordinatesD, orientationD
@@ -468,13 +479,14 @@ def doAction(gameDictionary):
                 # PASSAR
                 return "p", None, None, None
             else:
-                token = getRandomTokenFromWell(well) #ASSEGURAR QUE HO POT FER ENCARA QUE ESTIGUI AL REVES COMENTAR A VISIO
+                token = getRandomTokenFromWell(well)
                 coordinatesD = getEmptySpaceFromHand(robotHand)
                 coordinatesO = token[0][0:2]
                 # AGAFAR
                 return "a", coordinatesO, coordinatesD, "N"
         else:
-            extrem, extremValue = None
+            extrem = None
+            extremValue = None
             
             token = getBestOption(possibleTokens)
 
@@ -485,33 +497,8 @@ def doAction(gameDictionary):
                 extrem = extrems[1]
                 extremValue = extrems[1][3]
 
-            coordinatesD, orientationD = placeToken(board, extrem, extremValue, token) 
+            coordinatesD, orientationD = placeToken(board, extrem, extremValue, token)
+            print ("FINAL ORIENTATION: ", orientationD)
             coordinatesO = token[0][0:2]
             # TIRAR
             return "t", coordinatesO, coordinatesD, orientationD
-
-
-## TESTS ##
-##e1={
-##    'maRobot':{ 
-##            #idFitxa : [ (x,y,amplada,alçada), [ puntsEsquerra/Dalt, puntsDreta/Baix], orientació]
-##            0 :[(5,5,4,2),[1,1],0],
-##            1 :[(5,10,4, 2),[4,4],0],
-##            2 :[(5,15,4, 2),[4,2],0],
-##            3 :[(5,20,4, 2),[2,3],0]  
-##    },
-##    'maHuma':{ 
-##        0 :[(55,40,4,2),[1,2],0],
-##        1 :[(55,45,4, 2),[5,0],0] 
-##    },
-##    'taulell':{ 
-##        0 :[(26,24,4,2),[4,3],1],
-##        1 :[(23,25,4, 2),[6,3],0],
-##        2 :[(20,25,4, 2),[6,6],1]    
-##    },
-##    'pou':{}
-##}
-##
-##doAction(e1)
-
-#TO-DO: Col·locar la nova peça
