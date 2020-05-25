@@ -598,7 +598,7 @@ class ModulVisio():
                     orientacio = fitxa[2]
                     (x2,y2) = self.centered_coords((x,y))
 
-                    if orientacio == 0:
+                    if orientacio == 1:
                         ori = 'V'
                     else:
                         ori = 'H'
