@@ -8,7 +8,7 @@ class ModulVisio():
     def __init__(self, debug = False):
         self.debug = debug
         
-        # mides en cm del taulell #
+        # mides del taulell en cm
         self.midaTaulell =[60.0,55.0]
         self.midaMin = 10.0
         self.midaMax = 40.0      
@@ -28,34 +28,51 @@ class ModulVisio():
         self.midaFitxa = [0,0]
         self.rotacioDefecte = 0.0
         
+        #diciconari per guardar les fitxes de la partida
         self.estatPartida = {'maRobot':{},'maHuma':{},'taulell':{},'pou':{},'extrems':[]}
         self.tempEstatPartida = None
         
+        
+        self.output_frame = None
         
         self.extrems=[]
         self.fitxesEnTaulell = 0
         self.eix_X=[None,None] #[minim, maxim]
         self.eix_Y=[None,None]
     ###############################################################################################
+    '''
+        getGameStatus() : Retorna el diccionari amb les fitxes que ha processat i la seva informacio
+    '''
     def getGameStatus(self):
         return self.estatPartida
     ###############################################################################################
+    '''
+        updateFrame(frame) : Realitza les accions basiques de background substraction, 
+                                    i crida a les funcions per processar el frame rebut
+    '''    
     def updateFrame(self,frame,debug=None):
         if debug is not None:
             self.debug = debug
         self.frame = frame
-        self.grayFrame = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
+        self.grayFrame = cv.cvtColor(self.frame,cv.COLOR_BGR2GRAY)
+        # Guardem el fons original en cas que no en tinguem cap (taulell buit)
         if self.originalBackground is None:
             self.originalBackground = self.grayFrame
         else:
+            # Realitzem un background substraction per extreure les fitxes que hi ha
             self.fitxaFrame = cv.absdiff(self.grayFrame,self.originalBackground)
             self.fitxaFrame[self.fitxaFrame<127]=0
             self.fitxaFrame[self.fitxaFrame!=0]=255
+            
+            # Busquem el patro del mig de una fitxa així com la rotacio (en cas que n'hi hagi)
             if self.empty:
                 self.getFirstFeatures()
+            # Rotem el frame amb la rotacio trobada
             self.rotatedFrame = self.rotate_frame(self.fitxaFrame)
             
-            self.getTableData()
+            # Si ja tenim un patro enregistrat procedim a contar les fitxes
+            if not self.empty:
+                self.getTableData()
         
         if self.debug:
             print('[Visio: updateFrame()]')
@@ -77,6 +94,11 @@ class ModulVisio():
             plt.show()     
             
     ###############################################################################################
+    '''
+        contarPou() : Realitza un recompte de les fitxes que hi ha en la zona del pou i en registra la seva informacio
+                      (coordenades robot, mida en cm, punt a 0 i orientacio
+                      defini els punts a [0,0] per seguir amb el mateix format de fitxa de les altre zones
+    '''
     def contarPou(self):
         fitxaFrame = cv.absdiff(self.grayFrame,self.originalBackground)
         
@@ -106,7 +128,12 @@ class ModulVisio():
                 self.estatPartida['pou'][len(self.estatPartida['pou'])]=[(round(x,3),round(y,3),w,h),[0,0],1]
            
     ###############################################################################################
-    
+    '''
+        getFirstFeatures() : Busquem per el frame qualsevol contorn de fita i a partir d'aquest extraiem un patro 
+                             a partir del seu centre
+                             
+                             
+    '''
     def getFirstFeatures(self):
         
         midaMin = int((self.midaMin*self.frame.shape[1])/self.midaTaulell[0])    
@@ -144,12 +171,12 @@ class ModulVisio():
             h_gap = centerX - x
             v_gap = centerY - y
             
-            # Traslacio
+            # Traslacio del frame per centrar la fitxa
             dst = self.fitxaFrame.copy()
             M = np.float32([[1,0,h_gap],[0,1,v_gap]])
             dst = cv.warpAffine(dst,M,(cols,rows))
             
-            # Rotacio
+            # Rotacio del frame per deixar la fitxa en vertical
             if width > height: # Horitzontal
                 rotacio +=90
             else:
@@ -160,13 +187,17 @@ class ModulVisio():
             
             self.rotatedFrame = dst
             
-            # Definicio patron    
+            # Definicio patro  
+            
             templateHeight = height * 0.25
             templateWidth = width * 0.5
-            
+            # Retall del frame per extreure el patro
             self.patroH = dst[centerY-int(templateHeight*0.4):centerY+int(templateHeight*0.5), centerX-int(templateWidth*0.5):centerX+int(templateWidth*0.5)]
+            
+            # Desem el patro Vertical com a la transposicio del patro Horitzontal trobat 
             self.patroV = self.patroH.transpose()
             self.midaFitxa = [min(width, height),max(width, height)]
+            # Definim la rotació per defecte que tindran les demés fitxes del taulell
             self.rotacioDefecte = rotacio                
         
         if self.debug:
@@ -186,6 +217,9 @@ class ModulVisio():
             plt.show()
             
     ###############################################################################################
+    '''
+        rotate_frame() : Donat un frame, retorna el frame rotat amb la rotació per defecte detectada                               
+    '''
     def rotate_frame(self, frame):
         if self.rotacioDefecte != 0.0:
             (h,w) = frame.shape[:2]
@@ -207,7 +241,9 @@ class ModulVisio():
         return res
     
     ###############################################################################################
-    
+    '''
+        contarPunts() : Donada una regió d'interes (mitja fitxa) conta els punts que detecta
+    '''    
     def contarPunts(self,roi):
         roi = cv.GaussianBlur(roi,(5,5),0)
         _,threshold = cv.threshold(roi,127,255,cv.THRESH_BINARY)
@@ -248,6 +284,9 @@ class ModulVisio():
         return punts
     
     ###############################################################################################
+    '''
+        getZone() : Donades unes coordenades retorna el nom de la zona a la que pertanyen
+    '''      
     def getZone(self,pt):
         #self.estatPartida = {'maRobot':{},'maHuma':{},'taulell':{},'pou':{}}
         zona = 'taulell'
@@ -270,9 +309,16 @@ class ModulVisio():
             
         return zona    
     ###############################################################################################
-    
+    '''
+        getTableData() : Per cada patro registrat busquem coincidencies en el frame (template matching)
+                         Per cada coincidencia (fitxa) trobada, cridem a la funcio contar punts definint com a 
+                         regions d'interes ROI les dues parts de cada fitxa i registrem els punts segon la zona on
+                         s'hagi produit la coincidencia.
+                         
+                         A mes, per cada fitxa nova que es detecta, actualitzem els valors dels extrems de la partida
+    '''      
     def getTableData(self):
-        arrayPatrons = [self.patroH, self.patroV]
+        arrayPatrons = [self.patroH, self.patroV,np.flip(self.patroH,axis=0),np.flip(self.patroV,axis=1)]
         zonaMatch = int(min(self.patroV.shape))
         self.estatPartida = {'maRobot':{},'maHuma':{},'taulell':{},'pou':{},'extrems':[]}
         diccionariPunts={}
@@ -345,10 +391,11 @@ class ModulVisio():
                 
             diccionariPunts[dic][1]=[puntsA,puntsB]
             rotatedCenter = self.rotate_point((diccionariPunts[dic][0][0],diccionariPunts[dic][0][1]))
-            x,y = self.robot_coords(rotatedCenter)
-            # id: [[x,y,w,h],[puntsA,puntsB],orientacio]
             
             zona = self.getZone(rotatedCenter)
+                
+            x,y = self.robot_coords(rotatedCenter)           
+           
             
             alcadaPixels = int((self.midaTaulell[1]*self.frame.shape[0])/self.midaTaulell[1]-5)
             
@@ -356,7 +403,7 @@ class ModulVisio():
             h = round((h*self.midaTaulell[1])/(alcadaPixels),2)
             
             self.estatPartida[zona][len(self.estatPartida[zona])]=[(x,y,w,h),[puntsA,puntsB],orientacio]
-                     
+            self.estatPartida['extrems']=None
             if zona=='taulell':
                 if len(self.extrems) ==0:
                     
@@ -492,7 +539,10 @@ class ModulVisio():
             for d in self.estatPartida:
                 print('{}: {}'.format(d,self.estatPartida[d]))
             
-    ###############################################################################################                    
+    ###############################################################################################    
+    '''
+        rotate_point(pt) : Donada una coordenada, retorna la seva correspondencia amb la rotacio registrada
+    '''
     def rotate_point(self,pt):
         angle = (self.rotacioDefecte*math.pi)/180
         ox = self.rotatedFrame.shape[1]/2
@@ -504,9 +554,11 @@ class ModulVisio():
         y = int(y-((self.rotatedFrame.shape[0]-self.grayFrame.shape[0])/2))    
         return (x,y)
     ###############################################################################################
+    '''
+        robot_coords(pt) : Donada una coordenada, retorna la seva correspondencia en coordenades robot, on l'origen 
+                           esta desplaçat al centre inferior del frame. Retorna les coordenades en centimetres
+    '''
     def robot_coords(self,pt):
-        # TODO 
-        # midaTaulell 
         max_x=self.midaTaulell[0]
         max_y=self.midaTaulell[1]
         pt0 = pt[0]-self.grayFrame.shape[1]/2
@@ -517,21 +569,64 @@ class ModulVisio():
         return(x,y)
     
     ###############################################################################################
+    '''
+        centered_coords(pt) : Donada una coordenada robot, retorna la seva correspondencia amb l'origen al centre del frame.
+    '''    
+    def centered_coords(self,pt):
+        x,y = pt
+        x = int((x*self.frame.shape[1])/self.midaTaulell[0]) +(self.grayFrame.shape[1]/2)
+        y = -int((y*self.frame.shape[0])/self.midaTaulell[1]) +(self.grayFrame.shape[0])
         
+        return(int(x),int(y))
 
-
-    def robot_coords(self,pt):
-        # TODO 
-        # midaTaulell 
-        max_x=self.midaTaulell[0]
-        max_y=self.midaTaulell[1]
-        pt0 = pt[0]-self.grayFrame.shape[1]/2
-        pt1 = (pt[1]-self.grayFrame.shape[0])
-        
-        x = ((pt0*max_x)/self.grayFrame.shape[1])
-        y = -((pt1*max_y)/self.grayFrame.shape[0])
-        return(x,y)
     
     ###############################################################################################
+    '''
+        get_output_frame() : Crea una imatge amb la informacio de la partida i la retorna. 
+    '''
+    def get_output_frame(self):
+        self.output_frame = self.frame.copy()
+        font = cv.FONT_HERSHEY_PLAIN   
+        fontScale = 1
+        thickness = 1
+        for zona in self.estatPartida:
+            if zona != 'extrems' and zona!='pou':                    
+                for index in self.estatPartida[zona]:
+                    fitxa = self.estatPartida[zona][index]
+                    x,y,w,h = fitxa[0]
+                    punts = fitxa[1]
+                    orientacio = fitxa[2]
+                    (x2,y2) = self.centered_coords((x,y))
+
+                    if orientacio == 0:
+                        ori = 'V'
+                    else:
+                        ori = 'H'
+                    color = (255, 0, 0)
+                    
+                    self.output_frame = cv.putText(self.output_frame, '[{}:{}] {}'.format(punts[0],punts[1],ori), (x2+30,y2), font, fontScale, color, thickness, cv.LINE_AA) 
+                    self.output_frame = cv.putText(self.output_frame, '({},{})'.format(x,y), (x2+30,y2+15), font, fontScale, color, thickness, cv.LINE_AA)
+        ini_x = 15
+        ini_y = 15
+        padding = 10
+        color = (0,0,0)
+        nFitxes = len(self.estatPartida['pou'])+len(self.estatPartida['maHuma'])+len(self.estatPartida['maRobot'])+len(self.estatPartida['taulell'])
+        i=0
+        self.output_frame = cv.putText(self.output_frame, 'Nombre de fitxes: {}'.format(nFitxes), (ini_x,ini_y+padding+(i*ini_y)), font, fontScale, color, thickness, cv.LINE_AA) 
+        i+=1
+        self.output_frame = cv.putText(self.output_frame, 'Pou: {}'.format(len(self.estatPartida['pou'])), (ini_x,ini_y+padding+(i*ini_y)), font, fontScale, color, thickness, cv.LINE_AA) 
+        i+=1
+        self.output_frame = cv.putText(self.output_frame, 'Ma Huma: {}'.format(len(self.estatPartida['maHuma'])), (ini_x,ini_y+padding+(i*ini_y)), font, fontScale, color, thickness, cv.LINE_AA) 
+        i+=1
+        self.output_frame = cv.putText(self.output_frame, 'Ma Robot: {}'.format(len(self.estatPartida['maRobot'])), (ini_x,ini_y+padding+(i*ini_y)), font, fontScale, color, thickness, cv.LINE_AA) 
+        i+=1
+        self.output_frame = cv.putText(self.output_frame, 'Taulell: {}'.format(len(self.estatPartida['taulell'])), (ini_x,ini_y+padding+(i*ini_y)), font, fontScale, color, thickness, cv.LINE_AA) 
+        
+        i+=2
+        if(len(self.estatPartida['extrems'])>1):
+            self.output_frame = cv.putText(self.output_frame, 'Punts extrems: {} i {}'.format(self.estatPartida['extrems'][0][3],self.estatPartida['extrems'][1][3]), (ini_x,ini_y+padding+(i*ini_y)), font, fontScale, color, thickness, cv.LINE_AA) 
+        elif (len(self.estatPartida['extrems'])>0):
+            self.output_frame = cv.putText(self.output_frame, 'Punts extrems: {} i {}'.format(self.estatPartida['extrems'][0][1][0],self.estatPartida['extrems'][0][1][1]), (ini_x,ini_y+padding+(i*ini_y)), font, fontScale, color, thickness, cv.LINE_AA) 
+        return self.output_frame
         
 
